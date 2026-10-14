@@ -1,38 +1,19 @@
-# Kiểm thử 20/10 Minigame Studio 2.0
+# Kiểm thử 20/10 Minigame Studio 2.1
 
-Ngày: 14/10/2026. Môi trường: Linux, Node.js 24.19.0, Chromium và Playwright. Nâng cấp trên mã bản 1.0, không thay kiến trúc.
+Môi trường: Linux, Node.js, Chromium và Playwright. Chưa chạy trực tiếp trên Windows/TV thật.
 
-## Các kiểm tra tự động
+## Phạm vi kiểm tra
 
-`npm run check`: kiểm tra cú pháp máy chủ, luật chơi và giao diện.
+- Kiểm tra cú pháp máy chủ, luật chơi và giao diện.
+- 18 kiểm thử logic: 18 câu mặc định; chuyển đổi dữ liệu cũ; màn chờ không lộ nội dung; chấm một lần bấm; sai câu thường kết thúc/công bố; chuyển lượt; bốn tổ chịu thua mở vòng tự do; câu siêu khó/dự phòng cho thử tiếp; cộng điểm đúng một lần; +/- và hoàn tác; đồng hồ và bảo vệ đáp án.
+- 2 kiểm thử máy chủ thực: lưu/khởi động lại, sao lưu/khôi phục, chuyển đổi schema 1 và 2 giữ câu hỏi/media và tạo bản nguyên gốc trước chuyển đổi.
+- 7 kịch bản trình duyệt: màn chờ và khung TV giữa; vòng tự do; siêu khó/dự phòng; +/- điểm và vô địch; biên tập/gợi ý/media ngoại tuyến và sao lưu; toàn màn hình/Esc và đồng hồ; media câu hỏi, byte range, hoàn tác và bảo vệ yêu cầu.
 
-`npm test`: 19 kiểm thử luật/dữ liệu và 2 kiểm thử máy chủ thực:
+Các kiểm thử dùng dữ liệu tạm riêng. Kiểm thử ngoại tuyến chặn yêu cầu ngoài loopback.
 
-- 21 câu mặc định theo đúng nhóm; thao tác thêm/nhân bản/đổi thứ tự/xóa và hoàn tác.
-- Đúng +1, kết thúc câu nhưng giữ nguyên câu; sai +0 và giữ câu/tổ; chịu thua chuyển tổ; chọn tổ thủ công; bốn lần sai không tự mở thảo luận.
-- Chọn phương án chỉ lưu riêng cho Admin, có thể chấm khác đáp án; tự luận không cần nhập câu trả lời.
-- Không lộ đáp án/gợi ý/media gợi ý trước công bố; tắt gợi ý giữ nội dung và tệp.
-- Chống chấm lặp cùng câu; chỉnh điểm và hoàn tác được ghi vào lịch sử.
-- Câu đặc biệt không cộng điểm; phân định hòa phải được kích hoạt, đúng +1 và chỉ tổ được chọn tham gia.
-- Đồng hồ dừng/tiếp tục, tắt, hết giờ mặc định không đổi tổ/kết thúc câu; tự chuyển là tùy chọn; chấm giữ thời gian còn lại.
-- Khởi động lại máy chủ giữ điểm, tiến trình, lịch sử điểm và tạm dừng đồng hồ. Khôi phục sai định dạng và thao tác revision cũ không ghi đè dữ liệu.
-- Chuyển dữ liệu 1.0 giữ mọi trường câu hỏi, ID, media, tên tổ, điểm và danh sách câu đã chấm. Máy chủ tạo bản nguyên gốc trước chuyển đổi; kiểm tra bằng so sánh nội dung tệp. Khôi phục JSON 1.0 và JSON 2.0 có media gợi ý đang tắt vẫn giữ tệp.
+## Đóng gói
 
-`npm run test:browser`: 7 kịch bản Chromium với hai cửa sổ Admin/TV:
-
-1. Biên tập, xem trước riêng, tải ảnh, đồng bộ, chấm/hoàn tác, công bố đáp án, chuyển câu, đồng hồ, sao lưu/khôi phục, chặn tài nguyên ngoài loopback.
-2. Tự luận, thiết lập, câu đặc biệt không cộng điểm, phát/dừng WebM/WAV và giữ vị trí phát qua cập nhật, byte range video, vinh danh cá nhân.
-3. Chọn phương án và đối chiếu riêng, sai không kết thúc, chọn tổ/chịu thua, chấm khác đáp án, chống chấm lại, chỉnh điểm, lịch sử/hoàn tác. Kiểm tra nút chấm nằm trong viewport laptop 1366×768.
-4. Gợi ý đa phương tiện: tắt/bật giữ chữ và tệp, không gửi URL trước công bố, phát/dừng ngoại tuyến, sao lưu/khôi phục media, ẩn lại.
-5. Fullscreen API: vào/thoát ba lần, gồm Esc, kiểm tra trạng thái nút và khôi phục kích thước ban đầu; cập nhật tổ khi đang toàn màn hình, đổi viewport sau khi thoát. Không giả lập bằng CSS.
-6. Chọn tổ tham gia phân định hòa, tổ ngoài danh sách không được chọn; đúng +1, công bố tổ thắng, tắt đồng hồ trên TV.
-7. Đồng hồ 5 giây, tạm dừng/tiếp tục, âm báo được tạo đúng một lần khi bật tùy chọn và cho phép âm thanh; hết giờ không tự đổi câu hoặc tổ. Kiểm tra tạo tín hiệu âm thanh, không phải đo âm thanh từ loa thật.
-
-Các kịch bản dùng dữ liệu tạm và mẫu WebM/WAV/PNG, không ghi vào dữ liệu sự kiện. Trong kiểm thử ngoại tuyến, tất cả yêu cầu ngoài loopback đều bị chặn.
-
-## Đóng gói Windows
-
-Gói `20-10-Minigame-Studio-2.0.0-Windows.zip` có tên riêng, giữ nguyên gói 1.0. Bao gồm KHOI-DONG.cmd, Node.js Windows x64 và toàn bộ mã/tài nguyên cần chạy. Script đối chiếu SHA-256 runtime với bản công bố Node.js 24.14.0, kiểm tra ZIP và so sánh mã trong gói với mã đã kiểm thử. Gói không chứa thư mục data hoặc dữ liệu test.
+Gói Windows 2.1.0 chứa KHOI-DONG.cmd, runtime Node.js 24.14.0 Windows x64 và mã/tài nguyên ứng dụng. Kiểm tra SHA-256 runtime với SHASUMS chính thức, tính toàn vẹn ZIP và đối chiếu mã trong ZIP với nguồn. Không đưa dữ liệu sự kiện hoặc dữ liệu test vào gói. Giữ nguyên các gói cũ.
 
 ## Giới hạn kiểm thử và vận hành
 

@@ -1,204 +1,208 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import {
-  initial,
-  act,
-  audience,
-  remaining,
-  validate,
-  migrate,
-} from "../game.mjs";
-const open = () => {
+import { initial, act, audience, migrate, validate } from "../game.mjs";
+function open(category = "mv") {
   let s = initial();
-  return act(s, { type: "select", id: s.questions[0].id });
-};
-test("21 placeholders with correct category counts", () => {
+  return act(s, {
+    type: "show",
+    id: s.questions.find((q) => q.category === category).id,
+  });
+}
+function free() {
+  let s = open();
+  for (let i = 0; i < 4; i++) s = act(s, { type: "giveup" });
+  return s;
+}
+test("18 defaults, four categories, special is open-ended", () => {
   const s = initial();
-  assert.equal(s.questions.length, 21);
+  assert.equal(s.questions.length, 18);
   assert.deepEqual(
-    ["mv", "other", "special", "backup", "tie"].map(
+    ["mv", "other", "special", "backup"].map(
       (c) => s.questions.filter((q) => q.category === c).length,
     ),
-    [8, 4, 1, 3, 5],
+    [8, 4, 1, 5],
   );
+  assert.equal(s.questions[12].type, "open");
   validate(s);
 });
-test("giving up transfers, correct gives one point, advancement stays manual", () => {
-  let s = open();
-  s = act(s, { type: "pass" });
-  assert.equal(s.live.team, 1);
-  s = act(s, { type: "correct" });
-  assert.equal(s.teams[1].score, 1);
-  s = act(s, { type: "correct" });
-  assert.equal(s.teams[1].score, 1);
-  s = act(s, { type: "next" });
-  assert.equal(s.live.team, 1);
+test("select and next/previous enter waiting; content only sent after show", () => {
+  let s = initial();
+  s = act(s, { type: "select", id: s.questions[0].id });
+  assert.equal(s.live.mode, "waiting");
+  assert.deepEqual(Object.keys(audience(s).question).sort(), [
+    "category",
+    "id",
+    "number",
+  ]);
+  s = act(s, { type: "chooseOption", index: 0 });
+  assert.equal(s.teams[0].score, 0);
+  s = act(s, { type: "reveal" });
   assert.equal(s.live.reveal, false);
+  s = act(s, { type: "show" });
+  assert.equal(audience(s).question.title, s.questions[0].title);
+  s = act(s, { type: "next" });
+  assert.equal(s.live.mode, "waiting");
+  s = act(s, { type: "previous" });
+  assert.equal(s.live.questionId, s.questions[0].id);
+  assert.equal(audience(s).question.title, undefined);
 });
-test("four failures do not force discussion; admin explicitly opens volunteers", () => {
+test("one-click correct adds one, reveals and finishes without advancing", () => {
+  let s = open(),
+    id = s.live.questionId;
+  s = act(s, { type: "chooseOption", index: 0 });
+  assert.equal(s.teams[0].score, 1);
+  assert.equal(s.live.questionId, id);
+  assert.equal(s.live.settled, true);
+  assert.equal(audience(s).question.correct, 0);
+  s = act(s, { type: "chooseOption", index: 0 });
+  assert.equal(s.teams[0].score, 1);
+});
+test("wrong normal answer reveals and ends without scoring or passing", () => {
+  let s = open(),
+    id = s.live.questionId;
+  s = act(s, { type: "chooseOption", index: 1 });
+  assert.equal(s.teams[0].score, 0);
+  assert.equal(s.live.team, 0);
+  assert.equal(s.live.questionId, id);
+  assert.equal(s.live.settled, true);
+  assert.equal(s.live.feedback, "incorrect");
+  assert.equal(audience(s).question.correct, 0);
+});
+test("next regular starts after final answering team, for both correct and wrong", () => {
+  for (const index of [0, 1]) {
+    let s = open();
+    s = act(s, { type: "giveup" });
+    assert.equal(s.live.team, 1);
+    s = act(s, { type: "chooseOption", index });
+    s = act(s, { type: "team", index: 3 });
+    s = act(s, { type: "next" });
+    assert.equal(s.live.team, 2);
+    assert.equal(s.live.mode, "waiting");
+  }
+});
+test("manual team override, wraparound and no automatic question advance", () => {
   let s = open();
-  for (let i = 0; i < 4; i++) s = act(s, { type: "pass" });
-  assert.equal(s.live.mode, "question");
-  s = act(s, { type: "volunteer" });
-  assert.equal(s.live.mode, "discussion");
   s = act(s, { type: "team", index: 3 });
-  s = act(s, { type: "correct" });
+  s = act(s, { type: "chooseOption", index: 0 });
   assert.equal(s.teams[3].score, 1);
   s = act(s, { type: "next" });
-  assert.equal(s.live.team, 3);
+  assert.equal(s.live.team, 0);
+  s = act(s, { type: "team", index: 2 });
+  assert.equal(s.live.team, 2);
 });
-test("special question never gives team points", () => {
-  let s = initial();
-  s = act(s, { type: "select", id: s.questions[12].id });
-  s = act(s, { type: "correct" });
+test("giveup keeps answer hidden, switches team; four unique teams open free-for-all", () => {
+  let s = open(),
+    id = s.live.questionId;
+  s = act(s, { type: "giveup" });
+  assert.equal(s.live.team, 1);
+  assert.equal(s.live.questionId, id);
+  assert.equal(s.live.reveal, false);
+  s = act(s, { type: "team", index: 0 });
+  s = act(s, { type: "giveup" });
+  assert.equal(s.live.failed.length, 1);
+  for (const i of [1, 2, 3]) {
+    s = act(s, { type: "team", index: i });
+    s = act(s, { type: "giveup" });
+  }
+  assert.equal(s.live.freeForAll, true);
+  assert.equal(s.live.team, null);
+  assert.equal(s.live.settled, false);
+  assert.equal(audience(s).question.correct, undefined);
+});
+test("free-for-all requires team; wrong stays hidden/deselects; correct adds one and ends", () => {
+  let s = free();
+  assert.throws(() => act(s, { type: "chooseOption", index: 0 }));
+  s = act(s, { type: "team", index: 2 });
+  s = act(s, { type: "chooseOption", index: 1 });
+  assert.equal(s.live.team, null);
+  assert.equal(s.live.freeForAll, true);
+  assert.equal(s.live.settled, false);
+  assert.equal(audience(s).question.answer, undefined);
+  s = act(s, { type: "team", index: 3 });
+  s = act(s, { type: "chooseOption", index: 0 });
+  assert.equal(s.teams[3].score, 1);
+  assert.equal(s.live.reveal, true);
+  assert.equal(s.live.settled, true);
+});
+test("manual reveal ends free-for-all without points; resolved question cannot be replayed", () => {
+  let s = free(),
+    id = s.live.questionId;
+  s = act(s, { type: "reveal" });
+  assert.equal(s.live.settled, true);
+  assert.equal(s.live.reveal, true);
   assert.deepEqual(
     s.teams.map((t) => t.score),
     [0, 0, 0, 0],
   );
-  s = act(s, { type: "winner", name: "Người thắng" });
-  assert.equal(s.live.mode, "winner");
-});
-test("answer and hint never sent to audience before explicit reveal", () => {
-  let s = open();
-  for (const key of ["correct", "answer", "hint", "explanation"])
-    assert.equal(key in audience(s).question, false);
-  s = act(s, { type: "hint" });
-  assert.ok("hint" in audience(s).question);
-  assert.equal("answer" in audience(s).question, false);
-  s = act(s, { type: "reveal" });
-  assert.ok("answer" in audience(s).question);
-  s = act(s, { type: "reveal" });
-  assert.equal("answer" in audience(s).question, false);
-});
-test("undo restores score, question, team and paused timer", () => {
-  let s = open();
-  s = act(s, { type: "timer" });
-  s = act(s, { type: "correct" });
-  s = act(s, { type: "undo" });
-  assert.equal(s.teams[0].score, 0);
-  assert.equal(s.live.settled, false);
-  assert.equal(s.live.deadline, null);
-  assert.ok(s.live.remaining > 0);
-});
-test("reselecting answered question cannot award twice; reset clears award ledger", () => {
-  let s = open(),
-    id = s.live.questionId;
-  s = act(s, { type: "correct" });
   s = act(s, { type: "select", id });
-  s = act(s, { type: "correct" });
-  assert.equal(s.teams[0].score, 1);
-  s = act(s, { type: "reset" });
-  s = act(s, { type: "select", id });
-  s = act(s, { type: "correct" });
-  assert.equal(s.teams[0].score, 1);
-});
-test("timer pauses and expires with optional auto pass", () => {
-  let s = open();
-  s = act(s, { type: "timer" });
-  assert.ok(s.live.deadline);
-  assert.ok(remaining(s) <= 30000);
-  s = act(s, { type: "timer" });
-  assert.equal(s.live.deadline, null);
-  s = act(s, { type: "expired" });
-  assert.equal(s.live.team, 0);
-  s.settings.autoPass = true;
-  s = act(s, { type: "expired" });
-  assert.equal(s.live.team, 1);
-});
-test("CRUD reorder and delete active question safely", () => {
-  let s = open(),
-    id = s.live.questionId;
-  s = act(s, { type: "duplicate", id });
-  assert.equal(s.questions.length, 22);
-  assert.notEqual(s.questions[0].id, s.questions[1].id);
-  s = act(s, { type: "move", id, delta: 1 });
-  assert.equal(s.questions[1].id, id);
-  s = act(s, { type: "delete", id });
-  assert.equal(s.live.mode, "welcome");
-  assert.equal(s.live.questionId, null);
-  s = act(s, { type: "undo" });
-  assert.equal(s.live.questionId, id);
-});
-test("invalid backup, settings and media paths rejected", () => {
-  for (const mutate of [
-    (s) => (s.teams = []),
-    (s) => (s.settings.seconds = -1),
-    (s) =>
-      (s.questions[0].media = [
-        { file: "../../secret", kind: "image", name: "x" },
-      ]),
-    (s) => (s.live.team = 7),
-    (s) => (s.questions[0].correct = 99),
-  ]) {
-    const s = initial();
-    mutate(s);
-    assert.throws(() => validate(s));
-  }
-});
-test("score history records corrections and undo; tiebreak always awards one", () => {
-  let s = open();
-  s = act(s, {
-    type: "teams",
-    teams: s.teams.map((t) => ({ ...t, score: 5 })),
-  });
-  assert.equal(s.teams[0].score, 5);
-  s = act(s, { type: "undo" });
+  s = act(s, { type: "show" });
+  s = act(s, { type: "team", index: 0 });
+  s = act(s, { type: "chooseOption", index: 0 });
   assert.equal(s.teams[0].score, 0);
-  s.settings.tiePoints = 0;
-  s = act(s, { type: "tieRound", id: s.questions[16].id, teams: [0, 2] });
-  s = act(s, { type: "correct" });
-  assert.equal(s.teams[0].score, 1);
-  assert.equal(s.scoreLog[4].reason, "Hoàn tác");
 });
-test("scoring freezes the actual remaining countdown", () => {
-  let s = open();
-  s.live.deadline = Date.now() + 12000;
-  s = act(s, { type: "correct" });
-  assert.equal(s.live.deadline, null);
-  assert.ok(s.live.remaining > 11000 && s.live.remaining <= 12000);
-});
-
-test("incorrect keeps question/team active, no points or reveal; manual selection overrides", () => {
-  let s = open(),
-    id = s.live.questionId;
-  s = act(s, { type: "chooseOption", index: 2 });
+test("special wrong keeps hidden and active; correct reveals without team score or winner input", () => {
+  let s = open("special");
+  assert.equal(s.live.team, null);
   s = act(s, { type: "incorrect" });
-  assert.equal(s.live.questionId, id);
-  assert.equal(s.live.settled, false);
-  assert.equal(s.live.team, 0);
   assert.equal(s.live.reveal, false);
-  assert.equal(s.teams[0].score, 0);
+  assert.equal(s.live.settled, false);
+  s = act(s, { type: "correct" });
+  assert.equal(s.live.reveal, true);
+  assert.equal(s.live.settled, true);
+  assert.deepEqual(
+    s.teams.map((t) => t.score),
+    [0, 0, 0, 0],
+  );
+  assert.equal(s.live.winner, "");
+});
+test("backup freely selects any team, wrong stays hidden, correct always one", () => {
+  let s = open("backup");
+  s.settings.backupPoints = 8;
+  assert.equal(s.live.team, null);
+  s = act(s, { type: "team", index: 1 });
+  s = act(s, { type: "chooseOption", index: 1 });
+  assert.equal(s.live.team, null);
+  assert.equal(s.live.settled, false);
+  assert.equal(s.live.reveal, false);
   s = act(s, { type: "team", index: 3 });
-  assert.equal(s.live.team, 3);
-  assert.equal(s.live.selectedOption, null);
-  s = act(s, { type: "correct" });
+  s = act(s, { type: "chooseOption", index: 0 });
   assert.equal(s.teams[3].score, 1);
-  assert.equal(s.live.questionId, id);
+  assert.equal(s.live.reveal, true);
 });
-test("selected option stays private and admin can override stored judgment", () => {
+test("open-ended regular wrong ends; manual reveal also ends backup", () => {
   let s = open();
-  s = act(s, { type: "chooseOption", index: 2 });
-  assert.equal(s.live.selectedOption, 2);
-  assert.equal("selectedOption" in audience(s).live, false);
-  assert.equal("correct" in audience(s).question, false);
-  s = act(s, { type: "correct" });
-  assert.equal(s.teams[0].score, 1);
-  assert.equal("correct" in audience(s).question, false);
+  s.questions[0].type = "open";
+  s = act(s, { type: "incorrect" });
+  assert.equal(s.live.settled, true);
+  assert.equal(s.live.reveal, true);
+  s = open("backup");
+  s = act(s, { type: "reveal" });
+  assert.equal(s.live.settled, true);
 });
-test("disabled hint preserves text and media but never sends them to TV", () => {
-  let s = open(),
-    q = s.questions[0];
-  q.hint = "Bí mật";
-  q.hintMedia = [{ file: "abcd.mp3", kind: "audio", name: "Gợi ý" }];
-  q.hintEnabled = false;
+test("score buttons do not change turn; undo restores score and judging/reveal state", () => {
+  let s = open();
+  s = act(s, { type: "adjustScore", index: 3, delta: 1 });
+  assert.equal(s.live.team, 0);
+  assert.equal(s.teams[3].score, 1);
+  s = act(s, { type: "undo" });
+  assert.equal(s.teams[3].score, 0);
+  s = act(s, { type: "chooseOption", index: 0 });
+  s = act(s, { type: "undo" });
+  assert.equal(s.teams[0].score, 0);
+  assert.equal(s.live.reveal, false);
+  assert.equal(s.live.settled, false);
+  assert.equal(s.live.resolved.length, 0);
+  assert.equal(s.scoreLog.at(-1).reason, "Hoàn tác");
+});
+test("hidden hints/media preserved, selected option stays private until explicit rules reveal", () => {
+  let s = open();
+  s.questions[0].hintMedia = [
+    { file: "abcd.mp3", kind: "audio", name: "Gợi ý" },
+  ];
+  assert.equal(audience(s).question.hintMedia, undefined);
   s = act(s, { type: "hint" });
-  assert.equal(s.live.hint, false);
-  assert.equal("hintMedia" in audience(s).question, false);
-  assert.equal(s.questions[0].hint, "Bí mật");
-  s = act(s, { type: "saveQuestion", question: { ...q, hintEnabled: true } });
-  s = act(s, { type: "hint" });
-  assert.equal(audience(s).question.hintMedia[0].file, "abcd.mp3");
+  assert.equal(audience(s).question.hintMedia.length, 1);
   s = act(s, { type: "hintMedia" });
   assert.equal(s.live.hintPlaying, true);
   s = act(s, {
@@ -206,61 +210,78 @@ test("disabled hint preserves text and media but never sends them to TV", () => 
     question: { ...s.questions[0], hintEnabled: false },
   });
   assert.equal(s.live.hint, false);
-  assert.equal(s.live.hintPlaying, false);
   assert.equal(s.questions[0].hintMedia.length, 1);
+  assert.equal(audience(s).question.hintMedia, undefined);
+  assert.equal("selectedOption" in audience(s).live, false);
 });
-test("timer can be disabled, and expiry never ends question by default", () => {
-  let s = open();
+test("timer cannot start in waiting and default expiry never ends question or changes teams", () => {
+  let s = initial();
+  s = act(s, { type: "select", id: s.questions[0].id });
   s = act(s, { type: "timer" });
+  assert.equal(s.live.deadline, null);
+  s = act(s, { type: "show" });
+  s = act(s, { type: "timer" });
+  assert.ok(s.live.deadline);
+  s = act(s, { type: "expired" });
+  assert.equal(s.live.settled, false);
+  assert.equal(s.live.team, 0);
   s = act(s, {
     type: "settings",
     settings: { ...s.settings, timerEnabled: false },
   });
-  assert.equal(s.live.deadline, null);
   s = act(s, { type: "timer" });
   assert.equal(s.live.deadline, null);
-  s = act(s, { type: "expired" });
-  assert.equal(s.live.settled, false);
-  assert.equal(s.live.team, 0);
 });
-test("tiebreak requires explicit activation and confines answers to chosen participants", () => {
+test("migration preserves all questions/media/IDs and merges tie into backup without deleting", () => {
+  for (const version of ["v1", "v2"]) {
+    const old = JSON.parse(
+      readFileSync(new URL(`./fixtures/${version}.json`, import.meta.url)),
+    );
+    old.teams[1].score = 7;
+    const s = migrate(old);
+    assert.equal(s.version, 3);
+    assert.equal(s.questions.length, 21);
+    assert.equal(s.questions.filter((q) => q.category === "backup").length, 8);
+    assert.deepEqual(s.teams, old.teams);
+    old.questions.forEach((q, i) => {
+      assert.equal(s.questions[i].id, q.id);
+      assert.equal(s.questions[i].title, q.title);
+      assert.deepEqual(s.questions[i].options, q.options);
+      assert.deepEqual(s.questions[i].media, q.media);
+      assert.ok(s.questions[i].answer.includes(q.answer));
+    });
+    assert.equal(s.questions[12].type, "open");
+    assert.deepEqual(migrate(s), s);
+  }
+});
+test("CRUD, undo and reset preserve question content and clear round ledgers", () => {
   let s = open(),
-    id = s.questions.find((q) => q.category === "tie").id;
-  assert.throws(() => act(s, { type: "select", id }));
-  s = act(s, { type: "tieRound", teams: [1, 3], id });
-  assert.equal(s.live.team, 1);
-  assert.throws(() => act(s, { type: "team", index: 0 }));
-  s = act(s, { type: "giveup" });
-  assert.equal(s.live.team, 3);
+    id = s.live.questionId;
+  s = act(s, { type: "duplicate", id });
+  assert.equal(s.questions.length, 19);
+  s = act(s, { type: "move", id, delta: 1 });
+  assert.equal(s.questions[1].id, id);
+  s = act(s, { type: "delete", id });
+  assert.equal(s.live.questionId, null);
+  s = act(s, { type: "undo" });
+  assert.equal(s.live.questionId, id);
   s = act(s, { type: "correct" });
-  assert.equal(s.teams[3].score, 1);
+  s = act(s, { type: "reset" });
+  assert.equal(s.live.resolved.length, 0);
+  assert.equal(s.questions[1].id, id);
 });
-test("v1 migration preserves every question field, media, team, score and awards", () => {
-  const old = JSON.parse(
-    readFileSync(new URL("./fixtures/v1.json", import.meta.url)),
-  );
-  old.teams[2].score = 7;
-  old.questions[0].hint = "Gợi ý cũ";
-  old.live.awarded = [old.questions[0].id];
-  const s = migrate(old);
-  assert.equal(old.version, 1);
-  assert.equal(s.version, 2);
-  assert.deepEqual(s.teams, old.teams);
-  assert.deepEqual(s.live.awarded, old.live.awarded);
-  old.questions.forEach((q, i) =>
-    Object.entries(q).forEach(([k, v]) =>
-      assert.deepEqual(s.questions[i][k], v),
-    ),
-  );
-  assert.equal(s.questions[0].hintEnabled, true);
-  assert.deepEqual(migrate(s), s);
-});
-test("open-ended questions can be judged without entering a response", () => {
-  let s = open();
-  s.questions[0].type = "open";
-  s = act(s, { type: "incorrect" });
-  assert.equal(s.teams[0].score, 0);
-  assert.equal(s.live.settled, false);
-  s = act(s, { type: "correct" });
-  assert.equal(s.teams[0].score, 1);
+test("invalid data, media traversal and invalid team are rejected", () => {
+  for (const mutate of [
+    (s) => (s.live.team = 9),
+    (s) =>
+      (s.questions[0].hintMedia = [
+        { name: "x", kind: "image", file: "../x.png" },
+      ]),
+    (s) => (s.questions[0].category = "tie"),
+    (s) => (s.questions[12].type = "choice"),
+  ]) {
+    const s = initial();
+    mutate(s);
+    assert.throws(() => validate(s));
+  }
 });

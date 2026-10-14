@@ -1,0 +1,467 @@
+{
+  "version": 2,
+  "scoreLog": [],
+  "questions": [
+    {
+      "id": "a760ea22-47cb-4399-a9da-23b7a6fd5db6",
+      "category": "mv",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 1",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "3734a48b-7882-43e9-9bd6-623b6a8510db",
+      "category": "mv",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 2",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "bc7d710e-5bd2-4980-a45c-abec2ec565f5",
+      "category": "mv",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 3",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "3be75ccf-1bba-4d5b-a450-f7b1503c30f6",
+      "category": "mv",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 4",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "3f8006a8-02b9-4e60-9af1-5de0603ac163",
+      "category": "mv",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 5",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "e30a005d-baec-4df0-a9e1-aef4e7ffe43a",
+      "category": "mv",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 6",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "6095c823-1e77-4bf8-bc26-e07d91fa47bb",
+      "category": "mv",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 7",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "3b38077c-5159-4ac8-9ebd-188993225695",
+      "category": "mv",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 8",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "23e6d1a5-7e30-4826-87c5-734aa587598b",
+      "category": "other",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 9",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "a79103d8-bfe9-4ae8-9826-23b021f54caf",
+      "category": "other",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 10",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "d6968355-3004-4b67-98a7-791125964404",
+      "category": "other",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 11",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "c7c3acf8-47f1-48e5-b5f6-b3f715beb6de",
+      "category": "other",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 12",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "fa89f5e9-b5ca-4d60-99d9-12d109280dfe",
+      "category": "special",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 13",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "d9234515-a5b6-4cd3-8256-098173ed5276",
+      "category": "backup",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 14",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "049aa32e-dcc9-418d-8444-904e3b2bcdaa",
+      "category": "backup",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 15",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "ebd56e8f-34cb-4dd1-9bdc-bba4fb606006",
+      "category": "backup",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 16",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "25831877-a8ef-45fd-8f83-3d9e4ec4c674",
+      "category": "tie",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 17",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "3029181e-cd03-42c5-8d09-35bc1b8b085d",
+      "category": "tie",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 18",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "cab0f4b4-0c58-4466-8302-4465b14ec1b5",
+      "category": "tie",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 19",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "05e7d161-6090-4065-b4b4-e3536fbe6de3",
+      "category": "tie",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 20",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    },
+    {
+      "id": "cd7b283f-f789-4b6c-a295-c022275fef1e",
+      "category": "tie",
+      "type": "choice",
+      "title": "[Nội dung cần biên soạn] Câu 21",
+      "options": [
+        "Phương án A",
+        "Phương án B",
+        "Phương án C",
+        "Phương án D"
+      ],
+      "correct": 0,
+      "answer": "Đáp án tham khảo cần biên soạn",
+      "hint": "Gợi ý cần biên soạn",
+      "hintEnabled": true,
+      "hintMedia": [],
+      "explanation": "",
+      "media": []
+    }
+  ],
+  "teams": [
+    {
+      "name": "Tổ 1",
+      "score": 0
+    },
+    {
+      "name": "Tổ 2",
+      "score": 0
+    },
+    {
+      "name": "Tổ 3",
+      "score": 0
+    },
+    {
+      "name": "Tổ 4",
+      "score": 0
+    }
+  ],
+  "settings": {
+    "seconds": 30,
+    "timerEnabled": true,
+    "warningSound": false,
+    "autoPass": false,
+    "discussion": true,
+    "backupPoints": 1,
+    "tiePoints": 1,
+    "accent": "#ebae65",
+    "title": "Tôn vinh những điều rực rỡ",
+    "prize": "Giải thưởng đặc biệt",
+    "specialRules": "Người dẫn chương trình công bố thể lệ tại sự kiện."
+  },
+  "live": {
+    "questionId": null,
+    "selectedOption": null,
+    "tieActive": false,
+    "tieTeams": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "expiredAt": 0,
+    "feedbackTeam": null,
+    "hintPlaying": false,
+    "hintEpoch": 0,
+    "winnerKind": "team",
+    "team": 0,
+    "nextTeam": 0,
+    "failed": [],
+    "hint": false,
+    "reveal": false,
+    "feedback": "",
+    "mode": "welcome",
+    "remaining": 30000,
+    "deadline": null,
+    "settled": false,
+    "awarded": [],
+    "winner": "",
+    "mediaPlaying": false,
+    "mediaEpoch": 0
+  },
+  "history": []
+}

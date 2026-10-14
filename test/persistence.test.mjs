@@ -41,15 +41,16 @@ test("server restart keeps scores and content; rejected restore preserves data",
   try {
     await start();
     let s = await state();
-    await act("select", { id: s.questions[0].id });
+    await act("show", { id: s.questions[0].id });
     await act("correct");
     await act("next");
+    await act("show");
     await act("timer");
     await stop();
     await start();
     s = await state();
     assert.equal(s.teams[0].score, 1);
-    assert.equal(s.live.team, 0);
+    assert.equal(s.live.team, 1);
     assert.equal(s.scoreLog.length, 1);
     assert.equal(s.live.deadline, null);
     assert.ok(s.live.remaining > 0);
@@ -73,7 +74,7 @@ test("server restart keeps scores and content; rejected restore preserves data",
   }
 });
 
-test("startup migrates v1 with byte-for-byte safety copy; v1 restore and v2 hint backups retain files", async () => {
+test("startup migrates v1 with byte-for-byte safety copy; v1/v2 restore and v3 hint backups retain files", async () => {
   const fs = await import("node:fs/promises");
   const legacy = JSON.parse(
     await fs.readFile(new URL("./fixtures/v1.json", import.meta.url), "utf8"),
@@ -101,11 +102,11 @@ test("startup migrates v1 with byte-for-byte safety copy; v1 restore and v2 hint
       ),
     ]);
     let s = await (await fetch(base + "/api/state")).json();
-    assert.equal(s.version, 2);
+    assert.equal(s.version, 3);
     assert.equal(s.questions[0].title, legacy.questions[0].title);
     assert.equal(s.teams[0].score, 6);
     const backups = (await fs.readdir(dir)).filter((f) =>
-      f.startsWith("before-v2-"),
+      f.startsWith("before-v3-"),
     );
     assert.equal(backups.length, 1);
     assert.equal(
@@ -140,7 +141,7 @@ test("startup migrates v1 with byte-for-byte safety copy; v1 restore and v2 hint
     });
     assert.equal(res.status, 200);
     const backup = await (await fetch(base + "/api/backup")).json();
-    assert.equal(backup.format, "studio-2010-v2");
+    assert.equal(backup.format, "studio-2010-v3");
     assert.equal(backup.state.questions[0].hintEnabled, false);
     assert.equal(backup.state.questions[0].hintMedia.length, 1);
     assert.equal(backup.files["abcd.png"], oldBackup.files["abcd.png"]);
@@ -154,6 +155,20 @@ test("startup migrates v1 with byte-for-byte safety copy; v1 restore and v2 hint
       (await (await fetch(base + "/api/state")).json()).teams[0].score,
       6,
     );
+    const v2 = JSON.parse(
+      await fs.readFile(new URL("./fixtures/v2.json", import.meta.url), "utf8"),
+    );
+    v2.questions[16].title = "Nội dung phân định hòa cũ";
+    const restoredV2 = await fetch(base + "/api/restore", {
+      method: "POST",
+      headers: { Origin: base },
+      body: JSON.stringify({ format: "studio-2010-v2", state: v2, files: {} }),
+    });
+    assert.equal(restoredV2.status, 200);
+    const current = await (await fetch(base + "/api/state")).json();
+    assert.equal(current.questions.length, 21);
+    assert.equal(current.questions[16].category, "backup");
+    assert.equal(current.questions[16].title, "Nội dung phân định hòa cũ");
   } finally {
     child.kill();
     await once(child, "exit");

@@ -24,9 +24,9 @@ if (fs.existsSync(statePath)) {
     const original = fs.readFileSync(statePath, "utf8");
     const parsed = JSON.parse(original);
     state = migrate(parsed);
-    if (parsed.version === 1) {
+    if (parsed.version < 3) {
       fs.writeFileSync(
-        path.join(dir, `before-v2-${Date.now()}.json`),
+        path.join(dir, `before-v3-${Date.now()}.json`),
         original,
         { flag: "wx" },
       );
@@ -163,7 +163,7 @@ const server = http.createServer(async (req, res) => {
         for (const m of [...q.media, ...q.hintMedia])
           files[m.file] = fs.readFileSync(mediaFile(m.file)).toString("base64");
       const data = JSON.stringify({
-        format: "studio-2010-v2",
+        format: "studio-2010-v3",
         state: {
           ...state,
           history: [],
@@ -180,7 +180,9 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === "/api/restore" && req.method === "POST") {
       const b = JSON.parse(await body(req));
       if (
-        !["studio-2010-v1", "studio-2010-v2"].includes(b.format) ||
+        !["studio-2010-v1", "studio-2010-v2", "studio-2010-v3"].includes(
+          b.format,
+        ) ||
         !b.files ||
         typeof b.files !== "object"
       )

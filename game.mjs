@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-export const categories = ["mv", "other", "special", "backup", "tie"];
+export const categories = ["mv", "other", "special", "backup"];
 export function question(category = "mv", n = 1) {
   return {
     id: randomUUID(),
     category,
-    type: "choice",
+    type: category === "special" ? "open" : "choice",
     title: `[Nội dung cần biên soạn] Câu ${n}`,
     options: ["Phương án A", "Phương án B", "Phương án C", "Phương án D"],
     correct: 0,
@@ -18,14 +18,13 @@ export function question(category = "mv", n = 1) {
 }
 export function initial() {
   return {
-    version: 2,
+    version: 3,
     scoreLog: [],
     questions: [
       ...Array.from({ length: 8 }, (_, i) => question("mv", i + 1)),
       ...Array.from({ length: 4 }, (_, i) => question("other", i + 9)),
       question("special", 13),
-      ...Array.from({ length: 3 }, (_, i) => question("backup", i + 14)),
-      ...Array.from({ length: 5 }, (_, i) => question("tie", i + 17)),
+      ...Array.from({ length: 5 }, (_, i) => question("backup", i + 14)),
     ],
     teams: Array.from({ length: 4 }, (_, i) => ({
       name: `Tổ ${i + 1}`,
@@ -47,6 +46,8 @@ export function initial() {
     live: {
       questionId: null,
       selectedOption: null,
+      resolved: [],
+      freeForAll: false,
       tieActive: false,
       tieTeams: [0, 1, 2, 3],
       expiredAt: 0,
@@ -116,6 +117,35 @@ export function migrate(input) {
     if (s.questions.find((q) => q.id === s.live.questionId)?.category === "tie")
       s.live.tieActive = true;
   }
+  if (s?.version === 2) {
+    s.version = 3;
+    s.history = [];
+    for (const q of s.questions) {
+      if (q.category === "tie") q.category = "backup";
+      if (q.category === "special" && q.type === "choice") {
+        const correct = q.options?.[q.correct];
+        if (correct && correct !== q.answer)
+          q.answer =
+            correct + (q.answer ? "\nTham khảo trước đây: " + q.answer : "");
+        q.type = "open";
+      }
+    }
+    s.live.resolved = [
+      ...new Set([
+        ...s.live.awarded,
+        ...(s.live.settled && s.live.questionId ? [s.live.questionId] : []),
+      ]),
+    ];
+    s.live.freeForAll = s.live.mode === "discussion";
+    if (s.live.mode === "discussion") s.live.mode = "question";
+    const q = s.questions.find((q) => q.id === s.live.questionId);
+    if (
+      s.live.freeForAll ||
+      q?.category === "special" ||
+      q?.category === "backup"
+    )
+      s.live.team = null;
+  }
   validate(s);
   return s;
 }
@@ -134,57 +164,87 @@ function logScores(s, before, reason) {
       });
   });
 }
-function nextTeam(s) {
-  const allowed =
-    s.questions.find((q) => q.id === s.live.questionId)?.category === "tie"
-      ? s.live.tieTeams
-      : [0, 1, 2, 3];
-  return allowed[(allowed.indexOf(s.live.team) + 1) % allowed.length];
-}
 function select(s, id) {
   const q = s.questions.find((q) => q.id === id);
   if (!q) throw Error("Không tìm thấy câu hỏi.");
-  if (q.category === "tie" && !s.live.tieActive)
-    throw Error("Hãy mở vòng phân định hòa và chọn các tổ tham gia trước.");
   Object.assign(s.live, {
     questionId: id,
-    team:
-      q.category === "tie" && !s.live.tieTeams.includes(s.live.team)
-        ? s.live.tieTeams[0]
-        : s.live.team,
+    team: ["special", "backup"].includes(q.category) ? null : s.live.nextTeam,
     failed: [],
+    freeForAll: false,
     hint: false,
     reveal: false,
     feedback: "",
     feedbackTeam: null,
     selectedOption: null,
-    mode: "question",
+    mode: "waiting",
     remaining: s.settings.seconds * 1000,
     deadline: null,
     expiredAt: 0,
-    settled: s.live.awarded.includes(id),
+    settled: s.live.resolved.includes(id) || s.live.awarded.includes(id),
     winner: "",
     mediaPlaying: false,
     hintPlaying: false,
   });
 }
-function incorrect(s, transfer = false) {
-  if (s.live.settled || !s.live.questionId) return;
-  const l = s.live;
-  if (!l.failed.includes(l.team)) l.failed.push(l.team);
-  l.feedbackTeam = l.team;
-  l.feedback = transfer ? "giveup" : "incorrect";
+function playable(s) {
+  return (
+    s.live.mode === "question" &&
+    !s.live.settled &&
+    s.questions.some((q) => q.id === s.live.questionId)
+  );
+}
+function finish(s) {
+  const l = s.live,
+    q = s.questions.find((q) => q.id === l.questionId);
   l.remaining = remaining(s);
   l.deadline = null;
-  l.nextTeam = nextTeam(s);
-  if (
-    transfer &&
-    s.questions.find((q) => q.id === l.questionId)?.category !== "special"
-  ) {
-    l.team = l.nextTeam;
-    l.selectedOption = null;
-    l.remaining = s.settings.seconds * 1000;
+  l.reveal = true;
+  l.settled = true;
+  if (!l.resolved.includes(q.id)) l.resolved.push(q.id);
+  const lastTeam = l.team ?? l.feedbackTeam;
+  if (q.category !== "special" && lastTeam !== null)
+    l.nextTeam = (lastTeam + 1) % 4;
+}
+function judge(s, correct) {
+  if (!playable(s)) return;
+  const l = s.live,
+    q = s.questions.find((q) => q.id === l.questionId);
+  if (q.category !== "special" && l.team === null)
+    throw Error("Hãy chọn tổ giành quyền trả lời trước khi chấm.");
+  l.remaining = remaining(s);
+  l.deadline = null;
+  l.feedbackTeam = l.team;
+  if (correct) {
+    if (q.category !== "special" && !l.awarded.includes(q.id))
+      s.teams[l.team].score += 1;
+    if (!l.awarded.includes(q.id)) l.awarded.push(q.id);
+    l.feedback = "correct";
+    finish(s);
+  } else {
+    l.feedback = "incorrect";
+    if (l.freeForAll || q.category === "backup" || q.category === "special") {
+      l.reveal = false;
+      if (q.category !== "special") l.team = null;
+    } else finish(s);
   }
+}
+function giveup(s) {
+  if (!playable(s)) return;
+  const l = s.live,
+    q = s.questions.find((q) => q.id === l.questionId);
+  if (q.category === "special") return;
+  if (l.team === null) throw Error("Hãy chọn tổ trước khi chuyển lượt.");
+  l.feedbackTeam = l.team;
+  l.remaining = s.settings.seconds * 1000;
+  l.deadline = null;
+  l.feedback = "giveup";
+  l.selectedOption = null;
+  if (!l.failed.includes(l.team)) l.failed.push(l.team);
+  if (l.failed.length === 4 || l.freeForAll || q.category === "backup") {
+    if (l.failed.length === 4) l.freeForAll = true;
+    l.team = null;
+  } else l.team = (l.team + 1) % 4;
 }
 export function act(old, a) {
   const s = structuredClone(old);
@@ -205,6 +265,13 @@ export function act(old, a) {
     case "select":
       select(s, a.id);
       break;
+    case "show":
+      if (a.id && a.id !== l.questionId) select(s, a.id);
+      if (l.questionId) {
+        l.mode = "question";
+        if (l.settled) l.reveal = true;
+      }
+      break;
     case "previous":
     case "next": {
       const i = s.questions.findIndex((q) => q.id === l.questionId);
@@ -216,20 +283,9 @@ export function act(old, a) {
       }
       break;
     }
-    case "skip":
-      l.remaining = remaining(s);
-      l.nextTeam = (l.team + 1) % 4;
-      l.feedback = "skipped";
-      l.settled = true;
-      l.deadline = null;
-      break;
     case "team":
       if (!Number.isInteger(a.index) || a.index < 0 || a.index > 3)
         throw Error("Đội không hợp lệ.");
-      if (q?.category === "tie" && !l.tieTeams.includes(a.index))
-        throw Error(
-          "Tổ này không tham gia vòng phân định hòa. Có thể đổi danh sách ở Điểm số & kết quả.",
-        );
       l.team = a.index;
       l.selectedOption = null;
       l.feedback = "";
@@ -237,36 +293,38 @@ export function act(old, a) {
       l.deadline = null;
       break;
     case "incorrect":
-      incorrect(s);
+      judge(s, false);
       break;
     case "giveup":
     case "pass":
-      incorrect(s, true);
+      giveup(s);
       break;
     case "correct":
-      if (!q || l.settled) break;
-      l.remaining = remaining(s);
-      if (q.category !== "special") {
-        s.teams[l.team].score +=
-          q.category === "backup" ? s.settings.backupPoints : 1;
-      }
-      l.awarded.push(q.id);
-      l.settled = true;
-      l.feedback = "correct";
-      l.feedbackTeam = l.team;
-      l.nextTeam = (l.team + 1) % 4;
-      l.deadline = null;
+      judge(s, true);
+      break;
+    case "adjustScore":
+      if (
+        !Number.isInteger(a.index) ||
+        a.index < 0 ||
+        a.index > 3 ||
+        ![1, -1].includes(a.delta)
+      )
+        throw Error("Điều chỉnh điểm không hợp lệ.");
+      s.teams[a.index].score += a.delta;
       break;
     case "hint":
-      if (!q?.hintEnabled) break;
+      if (!q?.hintEnabled || l.mode !== "question") break;
       l.hint = !l.hint;
       if (!l.hint) l.hintPlaying = false;
       break;
     case "reveal":
-      l.reveal = !l.reveal;
+      if (q && l.mode === "question" && !l.settled) {
+        l.feedback = "revealed";
+        finish(s);
+      }
       break;
     case "timer":
-      if (!s.settings.timerEnabled || !q || l.settled) break;
+      if (!s.settings.timerEnabled || !playable(s)) break;
       l.expiredAt = 0;
       if (l.deadline !== null) {
         l.remaining = remaining(s);
@@ -285,10 +343,10 @@ export function act(old, a) {
       l.deadline = null;
       l.remaining = 0;
       l.expiredAt = Date.now();
-      if (s.settings.autoPass) incorrect(s, true);
+      if (s.settings.autoPass && l.team !== null) giveup(s);
       break;
     case "mode":
-      if (!["welcome", "score", "question"].includes(a.mode))
+      if (!["welcome", "score"].includes(a.mode))
         throw Error("Chế độ không hợp lệ.");
       l.remaining = remaining(s);
       l.mode = a.mode;
@@ -307,42 +365,21 @@ export function act(old, a) {
         q.type !== "choice" ||
         !Number.isInteger(a.index) ||
         a.index < 0 ||
-        a.index >= q.options.length ||
-        l.settled
+        a.index >= q.options.length
       )
-        throw Error("Không thể chọn phương án này.");
+        throw Error("Phương án không hợp lệ.");
+      if (!playable(s)) break;
       l.selectedOption = a.index;
+      judge(s, a.index === q.correct);
       break;
-    case "volunteer":
-      if (q && !l.settled) {
-        l.mode = "discussion";
-        l.feedback = "";
-        l.remaining = remaining(s);
-        l.deadline = null;
-      }
-      break;
-    case "tieRound": {
-      if (
-        !Array.isArray(a.teams) ||
-        a.teams.length < 2 ||
-        new Set(a.teams).size !== a.teams.length ||
-        !a.teams.every((n) => Number.isInteger(n) && n >= 0 && n < 4)
-      )
-        throw Error("Chọn ít nhất hai tổ khác nhau.");
-      if (s.questions.find((q) => q.id === a.id)?.category !== "tie")
-        throw Error("Hãy chọn câu phân định hòa.");
-      l.tieActive = true;
-      l.tieTeams = a.teams;
-      select(s, a.id);
-      break;
-    }
     case "hintMedia":
-      if (q?.hintEnabled && l.hint) {
+      if (q?.hintEnabled && l.hint && l.mode === "question") {
         l.hintPlaying = !l.hintPlaying;
         l.hintEpoch = Date.now();
       }
       break;
     case "media":
+      if (l.mode !== "question") break;
       l.mediaPlaying = !l.mediaPlaying;
       l.mediaEpoch = Date.now();
       break;
@@ -405,6 +442,8 @@ export function act(old, a) {
   const reasons = {
     correct: "Trả lời đúng",
     teams: "Điều chỉnh thủ công",
+    adjustScore: "Điều chỉnh trực tiếp",
+    chooseOption: "Trả lời đúng",
     reset: "Bắt đầu sự kiện mới",
   };
   logScores(s, beforeScores, reasons[a.type] || "Điều chỉnh điểm");
@@ -415,7 +454,7 @@ export function validate(s) {
   const str = (x, max = 10000) => typeof x === "string" && x.length <= max;
   if (
     !s ||
-    s.version !== 2 ||
+    s.version !== 3 ||
     !Array.isArray(s.questions) ||
     s.questions.length > 300 ||
     !Array.isArray(s.teams) ||
@@ -429,6 +468,7 @@ export function validate(s) {
       ids.has(q.id) ||
       !categories.includes(q.category) ||
       !["choice", "open"].includes(q.type) ||
+      (q.category === "special" && q.type !== "open") ||
       !str(q.title) ||
       !str(q.hint) ||
       !str(q.answer) ||
@@ -486,13 +526,13 @@ export function validate(s) {
     throw Error("Cài đặt không hợp lệ.");
   if (
     !l ||
-    ![l.team, l.nextTeam].every(
-      (n) => Number.isInteger(n) && n >= 0 && n < 4,
+    !(
+      l.team === null ||
+      (Number.isInteger(l.team) && l.team >= 0 && l.team < 4)
     ) ||
+    !(Number.isInteger(l.nextTeam) && l.nextTeam >= 0 && l.nextTeam < 4) ||
     !(l.questionId === null || ids.has(l.questionId)) ||
-    !["welcome", "question", "discussion", "score", "winner"].includes(
-      l.mode,
-    ) ||
+    !["welcome", "waiting", "question", "score", "winner"].includes(l.mode) ||
     !Array.isArray(l.failed) ||
     !l.failed.every((n) => Number.isInteger(n) && n >= 0 && n < 4) ||
     !Array.isArray(l.awarded) ||
@@ -506,7 +546,9 @@ export function validate(s) {
       (k) => typeof l[k] === "boolean",
     ) ||
     !Number.isFinite(l.mediaEpoch) ||
-    !["", "correct", "incorrect", "giveup", "skipped"].includes(l.feedback)
+    !["", "correct", "incorrect", "giveup", "skipped", "revealed"].includes(
+      l.feedback,
+    )
   )
     throw Error("Trạng thái trò chơi không hợp lệ.");
   if (
@@ -516,6 +558,9 @@ export function validate(s) {
         l.selectedOption >= 0 &&
         l.selectedOption < 10)
     ) ||
+    typeof l.freeForAll !== "boolean" ||
+    !Array.isArray(l.resolved) ||
+    !l.resolved.every((x) => str(x, 100)) ||
     typeof l.tieActive !== "boolean" ||
     !Array.isArray(l.tieTeams) ||
     l.tieTeams.length < 2 ||
@@ -561,25 +606,39 @@ export function audience(s) {
     live: Object.fromEntries(
       Object.entries(s.live).filter(
         ([key]) =>
-          !["selectedOption", "awarded", "failed", "nextTeam"].includes(key),
+          ![
+            "selectedOption",
+            "awarded",
+            "failed",
+            "nextTeam",
+            "resolved",
+            "tieTeams",
+            "tieActive",
+          ].includes(key),
       ),
     ),
     question: q
       ? {
           id: q.id,
-          title: q.title,
-          type: q.type,
+          number: s.questions.findIndex((x) => x.id === q.id) + 1,
           category: q.category,
-          options: q.options,
-          media: q.media,
-          ...(s.live.hint && q.hintEnabled
-            ? { hint: q.hint, hintMedia: q.hintMedia }
-            : {}),
-          ...(s.live.reveal
+          ...(s.live.mode !== "waiting"
             ? {
-                correct: q.correct,
-                answer: q.answer,
-                explanation: q.explanation,
+                title: q.title,
+                type: q.type,
+                category: q.category,
+                options: q.options,
+                media: q.media,
+                ...(s.live.hint && q.hintEnabled
+                  ? { hint: q.hint, hintMedia: q.hintMedia }
+                  : {}),
+                ...(s.live.reveal
+                  ? {
+                      correct: q.correct,
+                      answer: q.answer,
+                      explanation: q.explanation,
+                    }
+                  : {}),
               }
             : {}),
         }
