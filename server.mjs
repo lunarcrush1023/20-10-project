@@ -3,7 +3,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
-import { initial, act, validate, audience, remaining } from "./game.mjs";
+import {
+  initial,
+  act,
+  validate,
+  migrate,
+  audience,
+  remaining,
+} from "./game.mjs";
 const root = path.dirname(fileURLToPath(import.meta.url)),
   dir = process.env.STUDIO_DATA || path.join(root, "data"),
   port = Number(process.env.PORT || 2010);
@@ -14,11 +21,23 @@ let state = initial(),
 const instance = randomUUID();
 if (fs.existsSync(statePath)) {
   try {
-    state = JSON.parse(fs.readFileSync(statePath, "utf8"));
-    validate(state);
+    const original = fs.readFileSync(statePath, "utf8");
+    const parsed = JSON.parse(original);
+    state = migrate(parsed);
+    if (parsed.version === 1) {
+      fs.writeFileSync(
+        path.join(dir, `before-v2-${Date.now()}.json`),
+        original,
+        { flag: "wx" },
+      );
+      fs.writeFileSync(statePath + ".tmp", JSON.stringify(state));
+      fs.renameSync(statePath + ".tmp", statePath);
+    }
     state.history = [];
     state.live.remaining = remaining(state);
     state.live.deadline = null;
+    state.live.mediaPlaying = false;
+    state.live.hintPlaying = false;
   } catch (e) {
     console.error(
       "Du lieu khong doc duoc. Giu nguyen tep data/game.json de khoi phuc.",
@@ -141,10 +160,10 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === "/api/backup") {
       const files = {};
       for (const q of state.questions)
-        for (const m of q.media)
+        for (const m of [...q.media, ...q.hintMedia])
           files[m.file] = fs.readFileSync(mediaFile(m.file)).toString("base64");
       const data = JSON.stringify({
-        format: "studio-2010-v1",
+        format: "studio-2010-v2",
         state: {
           ...state,
           history: [],
@@ -161,15 +180,15 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === "/api/restore" && req.method === "POST") {
       const b = JSON.parse(await body(req));
       if (
-        b.format !== "studio-2010-v1" ||
+        !["studio-2010-v1", "studio-2010-v2"].includes(b.format) ||
         !b.files ||
         typeof b.files !== "object"
       )
         throw Error("Không đúng định dạng sao lưu.");
-      validate(b.state);
+      b.state = migrate(b.state);
       const staged = [];
       for (const q of b.state.questions)
-        for (const m of q.media) {
+        for (const m of [...q.media, ...q.hintMedia]) {
           if (
             typeof b.files[m.file] !== "string" ||
             !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(
@@ -190,6 +209,8 @@ const server = http.createServer(async (req, res) => {
       b.state.history = [];
       b.state.live.remaining = remaining(b.state);
       b.state.live.deadline = null;
+      b.state.live.mediaPlaying = false;
+      b.state.live.hintPlaying = false;
       save(b.state);
       return json(res, { ok: true });
     }
