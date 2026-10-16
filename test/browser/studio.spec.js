@@ -27,7 +27,7 @@ test.beforeEach(async ({ request, page }) => {
     (
       await request.post("/api/restore", {
         headers: { Origin: origin },
-        data: { format: "studio-2010-v3", state: initial(), files: {} },
+        data: { format: "studio-2010-v4", state: initial(), files: {} },
       })
     ).ok(),
   ).toBeTruthy();
@@ -156,7 +156,7 @@ test("special is individual open-ended; backup offers unrestricted hidden-answer
   const s = await snapshot(request);
   await page.goto("/");
   const tv = await tvPage(context);
-  await page.locator("#select-q").selectOption(s.questions[12].id);
+  await page.locator("#select-q").selectOption(s.questions[17].id);
   await expect(
     page.getByRole("button", { name: "ĐÚNG / CHỐT ĐÁP ÁN" }),
   ).toBeDisabled();
@@ -343,7 +343,7 @@ test("fullscreen repeatedly toggles with Escape and keeps sync; timer can pause,
   expect(await tv.evaluate(() => !!document.fullscreenElement)).toBe(true);
   await click(tv, "Thoát toàn màn hình");
   await click(tv, "Bật âm thanh");
-  await click(page, "Bắt đầu");
+  await click(page, "HIỆN CÂU HỎI");
   await click(page, "Tạm dừng");
   await click(page, "Tiếp tục");
   await expect(tv.locator("[data-clock]")).toHaveText("00s", { timeout: 8000 });
@@ -432,4 +432,160 @@ test("question media upload, private preview, playback/ranges, undo and request 
       })
     ).status(),
   ).toBe(409);
+});
+
+test("Question 1 re-show never leaks answers on TV or preview; auto timer pause/resume/reset", async ({
+  page,
+  context,
+  request,
+}) => {
+  await page.goto("/");
+  const tv = await tvPage(context),
+    preview = page.frameLocator("iframe");
+  await click(page, "HIỆN CÂU HỎI");
+  await expect(
+    page.getByRole("button", { name: "Tạm dừng", exact: true }),
+  ).toBeVisible();
+  await expect
+    .poll(async () => (await snapshot(request)).live.remaining)
+    .toBe(30000);
+  await expect(tv.locator("[data-clock]")).not.toHaveText("30s");
+  await click(page, "Tạm dừng");
+  const paused = (await snapshot(request)).live.remaining;
+  await click(page, "Tiếp tục");
+  expect((await snapshot(request)).live.deadline).not.toBeNull();
+  await click(page, "Đặt lại");
+  expect((await snapshot(request)).live.remaining).toBe(30000);
+  expect(paused).toBeLessThan(30000);
+  await option(page, 0).click();
+  await expect(tv.locator(".option.correct")).toHaveCount(1);
+  await expect(preview.locator(".option.correct")).toHaveCount(1);
+  for (const change of [false, true]) {
+    if (change) {
+      await click(page, "CÂU TIẾP THEO");
+      await click(page, "CÂU TRƯỚC");
+    }
+    await click(page, "HIỆN CÂU HỎI");
+    for (const view of [tv, preview]) {
+      await expect(view.locator(".option.correct")).toHaveCount(0);
+      await expect(view.getByText(/^Đáp án:/)).toHaveCount(0);
+      await expect(view.locator(".feedback")).toHaveCount(0);
+    }
+    await expect(option(page, 0)).toContainText("✓ Đáp án đúng");
+    const pub = await (await request.get("/api/audience")).json();
+    expect(pub.question).not.toHaveProperty("correct");
+    expect(pub.question).not.toHaveProperty("explanation");
+    await click(page, "HIỆN ĐÁP ÁN");
+    await expect(tv.locator(".option.correct")).toHaveCount(1);
+    expect((await snapshot(request)).teams[0].score).toBe(1);
+  }
+});
+
+test("19-item ordering and closing MP4 editor, clean TV, playback/restart/volume with muted preview", async ({
+  page,
+  context,
+  request,
+}) => {
+  await page.goto("/");
+  const s = await snapshot(request);
+  expect(s.questions.map((q) => q.category)).toEqual([
+    ...Array(8).fill("mv"),
+    ...Array(4).fill("other"),
+    ...Array(5).fill("backup"),
+    "special",
+    "video",
+  ]);
+  await expect(page.locator("#select-q option").nth(17)).toContainText(
+    "18. [Siêu khó]",
+  );
+  await expect(page.locator("#select-q option").last()).toContainText(
+    "19. [Video đặc biệt]",
+  );
+  await click(page, "01 · Quản lý câu hỏi");
+  await expect(page.locator(".question-row .badge").nth(12)).toHaveText(
+    "Dự phòng",
+  );
+  await expect(page.locator(".question-row .badge").nth(17)).toHaveText(
+    "Siêu khó",
+  );
+  await page.getByRole("button", { name: "Sửa", exact: true }).last().click();
+  await expect(
+    page.locator("#choices, #answer, #hintEnabled, #explanation"),
+  ).toHaveCount(0);
+  await page.locator("#title").fill("Lời chúc ngày 20/10");
+  await page.locator("#upload").setInputFiles("test/fixtures/closing.mp4");
+  await expect(page.locator(".media-chip")).toContainText("closing.mp4");
+  await click(page, "Lưu câu hỏi");
+  await expect(
+    page.getByRole("button", { name: "+ Thêm câu hỏi" }),
+  ).toBeVisible();
+  await click(page, "02 · Điều khiển trực tiếp");
+  const tv = await tvPage(context);
+  await click(tv, "Bật âm thanh");
+  await page.locator("#select-q").selectOption(s.questions[18].id);
+  await expect(
+    page.locator("[data-action=team], [data-action=adjustScore], .timer-panel"),
+  ).toHaveCount(0);
+  await click(page, "HIỆN VIDEO");
+  const preview = page.frameLocator("iframe");
+  for (const v of [tv, preview]) {
+    await expect(v.locator(".closing-video video")).toBeVisible();
+    await expect(
+      v.locator(
+        ".score-strip, [data-clock], .question-title, .individual-label",
+      ),
+    ).toHaveCount(0);
+    await expect
+      .poll(() => v.locator("video").evaluate((e) => e.currentTime))
+      .toBeGreaterThan(1);
+  }
+  expect((await snapshot(request)).live.deadline).toBeNull();
+  await click(page, "Tạm dừng");
+  await expect
+    .poll(() => tv.locator("video").evaluate((e) => e.paused))
+    .toBe(true);
+  await expect
+    .poll(() => preview.locator("video").evaluate((e) => e.paused))
+    .toBe(true);
+  const at = await tv.locator("video").evaluate((e) => e.currentTime);
+  await click(page, "Phát");
+  await expect
+    .poll(() => tv.locator("video").evaluate((e) => e.currentTime))
+    .toBeGreaterThan(at + 0.2);
+  await page.locator("#videoVolume").fill("0.3");
+  await page.locator("#videoVolume").dispatchEvent("change");
+  await expect
+    .poll(() => tv.locator("video").evaluate((e) => e.volume))
+    .toBeCloseTo(0.3);
+  await click(page, "Tắt tiếng");
+  await expect
+    .poll(() => tv.locator("video").evaluate((e) => e.muted))
+    .toBe(true);
+  await click(page, "Bật tiếng");
+  await expect
+    .poll(() => tv.locator("video").evaluate((e) => e.muted))
+    .toBe(false);
+  await expect
+    .poll(() => preview.locator("video").evaluate((e) => e.muted))
+    .toBe(true);
+  await click(page, "Phát lại từ đầu");
+  await expect
+    .poll(() => tv.locator("video").evaluate((e) => e.currentTime))
+    .toBeLessThan(2);
+  await expect
+    .poll(() => preview.locator("video").evaluate((e) => e.currentTime))
+    .toBeLessThan(2);
+  await tv.screenshot({ path: "work/closing-tv.png" });
+  const backup = await (await request.get("/api/backup")).json();
+  expect(backup.state.questions.at(-1).media).toHaveLength(1);
+  expect(Object.keys(backup.files)).toHaveLength(1);
+  const restore = await request.post("/api/restore", {
+    headers: { Origin: origin },
+    data: backup,
+  });
+  expect(restore.ok()).toBeTruthy();
+  await tv.reload();
+  await expect
+    .poll(() => tv.locator("video").evaluate((e) => e.paused))
+    .toBe(true);
 });

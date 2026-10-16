@@ -1,18 +1,18 @@
-# 20/10 Minigame Studio 2.1
+# 20/10 Minigame Studio 2.1.1
 
 Ứng dụng dẫn minigame ngoại tuyến: Admin trên laptop, trình chiếu riêng trên TV. Giao diện hoàn toàn bằng tiếng Việt, không tài khoản ứng dụng, không dịch vụ trả phí, không cần Internet khi tổ chức.
 
-**[Tải bản Windows 2.1](https://github.com/lunarcrush1023/20-10-project/blob/codex/20-10-studio-exact-flow/releases/20-10-Minigame-Studio-2.1.0-Windows.zip?raw=true)** — khoảng 33 MB, có sẵn bộ chạy. Repository riêng tư: đăng nhập GitHub bằng tài khoản có quyền xem kho nếu được yêu cầu. Nếu thấy trang tệp ZIP, bấm **Download raw file**.
+**[Tải bản Windows 2.1.1](https://github.com/lunarcrush1023/20-10-project/blob/codex/20-10-studio-v2.1.1/releases/20-10-Minigame-Studio-2.1.1-Windows.zip?raw=true)** — khoảng 33 MB, có sẵn bộ chạy. Repository riêng tư: đăng nhập GitHub bằng tài khoản có quyền xem kho nếu được yêu cầu. Nếu thấy trang tệp ZIP, bấm **Download raw file**.
 
-## Nếu bạn đang dùng bản 1.0 hoặc 2.0 — giữ nguyên dữ liệu cũ
+## Nếu bạn đang dùng bản 1.0, 2.0 hoặc 2.1 — giữ nguyên dữ liệu cũ
 
 1. Mở ứng dụng **bản cũ**, vào **Thiết lập → Sao lưu toàn bộ**, lưu tệp JSON ở nơi dễ tìm. Bản sao này chứa câu hỏi, tệp đính kèm, điểm và tiến trình.
-2. Đóng cửa sổ khởi động bản cũ. Tải ZIP 2.1 và **giải nén vào thư mục mới**, không xóa thư mục cũ, không mở hai phiên bản cùng lúc.
+2. Đóng cửa sổ khởi động bản cũ. Tải ZIP 2.1.1 và **giải nén vào thư mục mới**, không xóa thư mục cũ, không mở hai phiên bản cùng lúc.
 3. Trong thư mục mới, nhấp đúp **KHOI-DONG.cmd**. Trình duyệt tự mở sau khoảng 2 giây. Nếu trình duyệt đang giữ trang cũ, nhấn Ctrl + F5.
 4. Vào **Thiết lập → Khôi phục từ bản sao**, chọn JSON vừa lưu và xác nhận. Kiểm tra số câu, tên tổ, điểm và phát thử các tệp của bạn.
-5. Xuất thêm một bản sao từ phiên bản 2.1 trước sự kiện. Bản sao 2.1 chứa cả gợi ý đa phương tiện và lịch sử điểm; không khôi phục nó bằng ứng dụng 1.0/2.0.
+5. Xuất thêm một bản sao từ phiên bản 2.1.1 trước sự kiện. Bản sao 2.1.1 chứa cả gợi ý đa phương tiện và lịch sử điểm; không khôi phục nó bằng ứng dụng 1.0/2.0/2.1.
 
-Ứng dụng không thể tự lấy câu hỏi đã nhập trên laptop của bạn từ GitHub. Hãy dùng bản sao JSON để chuyển dữ liệu. Gói tải về không chứa dữ liệu sự kiện của bạn và không tự xóa dữ liệu cũ. Nếu dùng trực tiếp thư mục data cũ với máy chủ 2.1, ứng dụng tạo bản trạng thái nguyên gốc `data/before-v3-<thời điểm>.json` trước khi chuyển đổi; toàn bộ tệp media giữ nguyên. Cách dùng giao diện sao lưu/khôi phục ở trên vẫn được khuyến nghị cho người tổ chức.
+Ứng dụng không thể tự lấy câu hỏi đã nhập trên laptop của bạn từ GitHub. Hãy dùng bản sao JSON để chuyển dữ liệu. Gói tải về không chứa dữ liệu sự kiện của bạn và không tự xóa dữ liệu cũ. Nếu dùng trực tiếp thư mục data cũ với máy chủ 2.1.1, ứng dụng tạo bản trạng thái nguyên gốc `data/before-v4-<thời điểm>.json` trước khi chuyển đổi; toàn bộ tệp media giữ nguyên. Cách dùng giao diện sao lưu/khôi phục ở trên vẫn được khuyến nghị cho người tổ chức.
 
 ## Cài mới và mở ứng dụng
 
@@ -25,24 +25,32 @@ Nếu Windows hoặc máy công ty chặn tệp tải xuống, kiểm tra nguồ
 
 ## Quản lý câu hỏi
 
-Bản cài mới có 18 câu giữ chỗ: 8 MV, 4 chủ đề khác, 1 siêu khó cá nhân và 5 dự phòng. Dữ liệu cũ được giữ đầy đủ: câu phân định hòa chuyển thành dự phòng, không xóa bớt câu. Câu siêu khó chuyển thành tự luận và giữ nội dung đáp án cũ.
+Bản cài mới có 19 mục: 1–8 Trong MV, 9–12 Chủ đề khác, 13–17 Dự phòng, 18 Siêu khó cá nhân và 19 Video đặc biệt. Dữ liệu 2.1 tự chuyển thứ tự Dự phòng lên trước Siêu khó và thêm mục video cuối cùng, giữ nguyên ID, nội dung và tệp. Nếu đã có nhiều câu hơn mẫu, ứng dụng giữ tất cả câu và sắp theo nhóm; số thứ tự cuối có thể lớn hơn 19. Nút ↑/↓ đổi thứ tự trong cùng nhóm. Dữ liệu cũ được giữ đầy đủ: câu phân định hòa chuyển thành dự phòng, không xóa bớt câu. Câu siêu khó chuyển thành tự luận và giữ nội dung đáp án cũ.
 
 Thêm/sửa/nhân bản, đổi thứ tự, đính kèm ảnh/âm thanh/video từ máy rồi bấm Lưu câu hỏi. Trắc nghiệm chỉ hiện phần phương án; tự luận chỉ hiện đáp án tham khảo. Đổi loại vẫn giữ nội dung đang ẩn. Có thể bật gợi ý chữ và media; tắt gợi ý không xóa nội dung. Xem trước riêng không gửi lên TV.
 
 ## Điều khiển trực tiếp
 
-1. Chọn câu bằng danh sách hoặc Câu trước/Câu tiếp theo: TV chỉ hiện “Chuẩn bị…” cùng số câu và nhóm. Bấm **HIỆN CÂU HỎI** mới công bố nội dung.
+1. Chọn câu bằng danh sách hoặc Câu trước/Câu tiếp theo: TV chỉ hiện “Chuẩn bị…” cùng số câu và nhóm. Bấm **HIỆN CÂU HỎI** mới công bố nội dung, luôn giấu đáp án và xóa phản hồi/lựa chọn trước đó. Nếu bật đồng hồ, thao tác này tự đặt lại thời lượng và bắt đầu đếm ngay.
 2. Admin luôn thấy đáp án đúng màu xanh và giải thích riêng. Khung TV ở giữa hiển thị trạng thái công khai, gồm màn chờ, câu hỏi, điểm, đồng hồ và kết quả; bản xem trước tắt tiếng.
 3. Câu trắc nghiệm: bấm phương án tổ đã trả lời để chấm ngay. Câu thường đúng cộng 1; sai cộng 0. Cả hai đều công bố đáp án và kết thúc câu. Tự luận dùng nút Đúng/Sai.
 4. Chịu thua chuyển lần lượt Tổ 1 → 2 → 3 → 4 → 1. Khi bốn tổ khác nhau cùng chịu thua ở một câu, ứng dụng tự mở vòng tự do và bỏ chọn tổ. Chọn tổ giơ tay: sai thì tiếp tục ẩn đáp án và bỏ chọn tổ, đúng cộng 1 rồi công bố/kết thúc.
 5. Câu thường tiếp theo bắt đầu ở tổ sau tổ trả lời cuối của câu trước, kể cả trả lời sai. MC có thể chọn lại tổ bất kỳ.
 6. Câu siêu khó luôn tự luận cá nhân, không nhập tên người thắng, không cộng điểm tổ. Sai cho thử tiếp và ẩn đáp án; đúng công bố/kết thúc.
 7. Câu dự phòng bắt đầu chưa chọn tổ. MC chọn bất kỳ tổ giơ tay; sai tiếp tục ẩn đáp án và bỏ chọn tổ, đúng cộng đúng 1 điểm rồi kết thúc.
-8. **HIỆN ĐÁP ÁN** kết thúc câu, không cộng điểm. Câu đã kết thúc không được chấm lại để cộng điểm lần nữa. Dùng Hoàn tác nếu thao tác nhầm.
+8. **HIỆN ĐÁP ÁN** kết thúc câu, không cộng điểm. Câu đã kết thúc không được chấm lại để cộng điểm lần nữa. Dùng Hoàn tác nếu thao tác nhầm. Mở lại câu đã chấm vẫn giấu đáp án, không cộng điểm lại; dùng HIỆN ĐÁP ÁN để công bố lại.
 
 Nút **+ / −** nằm ngay từng thẻ tổ, mỗi lần điều chỉnh 1 điểm và ghi lịch sử. Không còn Tab 03. Đổi tên tổ trong Thiết lập; xem lịch sử điểm tại Điều khiển trực tiếp. Nút cúp công bố tổ vô địch nằm cùng vùng Trình chiếu với Chào mừng/Bảng điểm. Nếu hòa dẫn đầu, dùng câu dự phòng để phân định trước khi công bố.
 
-Đồng hồ: bật/tắt, đặt số giây, Bắt đầu/Tạm dừng/Tiếp tục/Đặt lại. Mặc định hết giờ chỉ dừng đồng hồ. Tùy chọn tự chuyển tổ trong Thiết lập áp dụng khi đang có tổ được chọn; lượt mới chờ MC bắt đầu đồng hồ. Không bắt đầu đồng hồ khi câu còn ở màn chờ. Nút phát/dừng câu hỏi và gợi ý điều khiển media trên TV; chỉ phát gợi ý sau khi hiện gợi ý.
+Đồng hồ: bật/tắt, đặt số giây. HIỆN CÂU HỎI tự chạy đồng hồ; Tạm dừng giữ thời gian còn lại, Tiếp tục chạy tiếp, Đặt lại đưa về thời lượng cấu hình và tạm dừng. Bấm Bắt đầu để chạy sau khi đặt lại. Video đặc biệt không chạy đồng hồ. Mặc định hết giờ chỉ dừng đồng hồ. Tùy chọn tự chuyển tổ trong Thiết lập áp dụng khi đang có tổ được chọn; lượt mới chờ MC bắt đầu đồng hồ. Không bắt đầu đồng hồ khi câu còn ở màn chờ. Nút phát/dừng câu hỏi và gợi ý điều khiển media trên TV; chỉ phát gợi ý sau khi hiện gợi ý.
+
+## Video đặc biệt — mục cuối chương trình
+
+1. Trong Quản lý câu hỏi, sửa mục **Video đặc biệt**: nhập tiêu đề và tải một video **MP4** từ máy, tối đa 100 MB, rồi lưu. Không có phương án/đáp án/gợi ý/giải thích cho mục này. Ưu tiên MP4 H.264/AAC.
+2. Trong Điều khiển trực tiếp, chọn mục cuối → **HIỆN VIDEO**. Video tự phát trên toàn vùng TV, không khung câu hỏi, điểm, tổ hoặc đồng hồ. Tỷ lệ video được giữ, có thể có viền đen để không cắt hình.
+3. Dùng **Phát / Tạm dừng**, **Phát lại từ đầu**, thanh **Âm lượng** và **Tắt tiếng / Bật tiếng** trên Admin. Khi video kết thúc, bấm Phát lại từ đầu để xem lại.
+4. Khung ĐANG TRÊN TV cũng phát video nhưng luôn tắt tiếng. Nếu trình duyệt chặn tự phát có tiếng, bấm **Bật âm thanh** trên cửa sổ TV một lần. Các nút TV hiện khi đưa chuột lên vùng góc trái trên; Esc thoát toàn màn hình như trước.
+5. Tệp video được lưu ngoại tuyến và đi cùng bản sao lưu. Hãy tải video của bạn trước sự kiện; gói ứng dụng không kèm video nội dung mặc định.
 
 ## Đưa Minigame lên TV
 
@@ -69,7 +77,7 @@ Trình duyệt có thể chặn tự phát âm thanh cho tới khi bạn bấm B
 
 Giữ nguyên kiến trúc bản 1.0: Node.js tiêu chuẩn, HTML/CSS/JavaScript thuần, HTTP chỉ lắng nghe loopback `127.0.0.1`, JSON và media cục bộ. Không có phụ thuộc production, CDN, font ngoài hoặc API Internet. Poll trạng thái 500 ms; đồng hồ lấy mốc thời gian máy chủ. API TV loại đáp án chưa công bố, lựa chọn riêng của MC và media gợi ý chưa hiện. File API hỗ trợ byte range cho video. Fullscreen dùng requestFullscreen/exitFullscreen/fullscreenchange, không giả bằng CSS.
 
-Dữ liệu schema 3; nhận bản sao `studio-2010-v1`, `studio-2010-v2` và `studio-2010-v3`. Chuyển đổi cộng thêm trường mới, giữ nội dung và ID cũ. Ghi trạng thái bằng tệp tạm rồi đổi tên; dữ liệu lỗi không bị tự thay bằng dữ liệu mẫu.
+Dữ liệu schema 4; nhận bản sao `studio-2010-v1`, `studio-2010-v2`, `studio-2010-v3` và `studio-2010-v4`. Chuyển đổi cộng thêm trường mới, giữ nội dung và ID cũ. Ghi trạng thái bằng tệp tạm rồi đổi tên; dữ liệu lỗi không bị tự thay bằng dữ liệu mẫu.
 
 ```sh
 npm ci

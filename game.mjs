@@ -1,11 +1,19 @@
 import { randomUUID } from "node:crypto";
-export const categories = ["mv", "other", "special", "backup"];
+export const categories = ["mv", "other", "backup", "special", "video"];
 export function question(category = "mv", n = 1) {
   return {
     id: randomUUID(),
     category,
-    type: category === "special" ? "open" : "choice",
-    title: `[Nội dung cần biên soạn] Câu ${n}`,
+    type:
+      category === "video"
+        ? "video"
+        : category === "special"
+          ? "open"
+          : "choice",
+    title:
+      category === "video"
+        ? "Video đặc biệt"
+        : `[Nội dung cần biên soạn] Câu ${n}`,
     options: ["Phương án A", "Phương án B", "Phương án C", "Phương án D"],
     correct: 0,
     answer: "Đáp án tham khảo cần biên soạn",
@@ -18,13 +26,14 @@ export function question(category = "mv", n = 1) {
 }
 export function initial() {
   return {
-    version: 3,
+    version: 4,
     scoreLog: [],
     questions: [
       ...Array.from({ length: 8 }, (_, i) => question("mv", i + 1)),
       ...Array.from({ length: 4 }, (_, i) => question("other", i + 9)),
-      question("special", 13),
-      ...Array.from({ length: 5 }, (_, i) => question("backup", i + 14)),
+      ...Array.from({ length: 5 }, (_, i) => question("backup", i + 13)),
+      question("special", 18),
+      question("video", 19),
     ],
     teams: Array.from({ length: 4 }, (_, i) => ({
       name: `Tổ ${i + 1}`,
@@ -69,6 +78,10 @@ export function initial() {
       winner: "",
       mediaPlaying: false,
       mediaEpoch: 0,
+      videoPosition: 0,
+      videoStartedAt: null,
+      videoVolume: 1,
+      videoMuted: false,
     },
     history: [],
   };
@@ -84,7 +97,14 @@ function remember(s) {
       questions: s.questions,
       teams: s.teams,
       settings: s.settings,
-      live: { ...s.live, remaining: remaining(s), deadline: null },
+      live: {
+        ...s.live,
+        remaining: remaining(s),
+        deadline: null,
+        videoPosition: videoPosition(s),
+        videoStartedAt: null,
+        mediaPlaying: false,
+      },
     }),
   );
   if (s.history.length > 40) s.history.shift();
@@ -146,8 +166,35 @@ export function migrate(input) {
     )
       s.live.team = null;
   }
+  if (s?.version === 3) {
+    s.version = 4;
+    s.history = [];
+    s.questions.sort(
+      (a, b) => categories.indexOf(a.category) - categories.indexOf(b.category),
+    );
+    if (!s.questions.some((q) => q.category === "video"))
+      s.questions.push(question("video", 19));
+    Object.assign(s.live, {
+      videoPosition: 0,
+      videoStartedAt: null,
+      videoVolume: 1,
+      videoMuted: false,
+      reveal: false,
+      selectedOption: null,
+      feedback: "",
+      feedbackTeam: null,
+    });
+  }
   validate(s);
   return s;
+}
+export function videoPosition(s, now = Date.now()) {
+  return (
+    s.live.videoPosition +
+    (s.live.videoStartedAt === null
+      ? 0
+      : Math.max(0, now - s.live.videoStartedAt) / 1000)
+  );
 }
 function logScores(s, before, reason) {
   s.teams.forEach((t, i) => {
@@ -169,7 +216,9 @@ function select(s, id) {
   if (!q) throw Error("Không tìm thấy câu hỏi.");
   Object.assign(s.live, {
     questionId: id,
-    team: ["special", "backup"].includes(q.category) ? null : s.live.nextTeam,
+    team: ["special", "backup", "video"].includes(q.category)
+      ? null
+      : s.live.nextTeam,
     failed: [],
     freeForAll: false,
     hint: false,
@@ -184,6 +233,8 @@ function select(s, id) {
     settled: s.live.resolved.includes(id) || s.live.awarded.includes(id),
     winner: "",
     mediaPlaying: false,
+    videoPosition: 0,
+    videoStartedAt: null,
     hintPlaying: false,
   });
 }
@@ -191,7 +242,9 @@ function playable(s) {
   return (
     s.live.mode === "question" &&
     !s.live.settled &&
-    s.questions.some((q) => q.id === s.live.questionId)
+    s.questions.some(
+      (q) => q.id === s.live.questionId && q.category !== "video",
+    )
   );
 }
 function finish(s) {
@@ -268,8 +321,27 @@ export function act(old, a) {
     case "show":
       if (a.id && a.id !== l.questionId) select(s, a.id);
       if (l.questionId) {
-        l.mode = "question";
-        if (l.settled) l.reveal = true;
+        const current = s.questions.find((x) => x.id === l.questionId);
+        l.reveal = false;
+        l.selectedOption = null;
+        l.feedback = "";
+        l.feedbackTeam = null;
+        l.hint = false;
+        l.hintPlaying = false;
+        l.expiredAt = 0;
+        l.remaining = s.settings.seconds * 1000;
+        l.mode = current.category === "video" ? "video" : "question";
+        l.deadline =
+          s.settings.timerEnabled && l.mode === "question"
+            ? Date.now() + l.remaining
+            : null;
+        if (l.mode === "video") {
+          l.team = null;
+          l.videoPosition = 0;
+          l.videoStartedAt = Date.now();
+          l.mediaPlaying = true;
+          l.mediaEpoch++;
+        }
       }
       break;
     case "previous":
@@ -284,6 +356,7 @@ export function act(old, a) {
       break;
     }
     case "team":
+      if (q?.category === "video") break;
       if (!Number.isInteger(a.index) || a.index < 0 || a.index > 3)
         throw Error("Đội không hợp lệ.");
       l.team = a.index;
@@ -303,6 +376,7 @@ export function act(old, a) {
       judge(s, true);
       break;
     case "adjustScore":
+      if (q?.category === "video") break;
       if (
         !Number.isInteger(a.index) ||
         a.index < 0 ||
@@ -318,13 +392,23 @@ export function act(old, a) {
       if (!l.hint) l.hintPlaying = false;
       break;
     case "reveal":
-      if (q && l.mode === "question" && !l.settled) {
+      if (q && q.category !== "video" && l.mode === "question" && !l.reveal) {
         l.feedback = "revealed";
-        finish(s);
+        if (!l.settled) finish(s);
+        else {
+          l.reveal = true;
+          l.remaining = remaining(s);
+          l.deadline = null;
+        }
       }
       break;
     case "timer":
-      if (!s.settings.timerEnabled || !playable(s)) break;
+      if (
+        !s.settings.timerEnabled ||
+        l.mode !== "question" ||
+        q?.category === "video"
+      )
+        break;
       l.expiredAt = 0;
       if (l.deadline !== null) {
         l.remaining = remaining(s);
@@ -344,6 +428,33 @@ export function act(old, a) {
       l.remaining = 0;
       l.expiredAt = Date.now();
       if (s.settings.autoPass && l.team !== null) giveup(s);
+      break;
+    case "videoPlayback":
+      if (q?.category !== "video" || l.mode !== "video") break;
+      l.videoPosition = videoPosition(s);
+      l.mediaPlaying = !l.mediaPlaying;
+      l.videoStartedAt = l.mediaPlaying ? Date.now() : null;
+      l.mediaEpoch++;
+      break;
+    case "videoRestart":
+      if (q?.category !== "video" || l.mode !== "video") break;
+      l.videoPosition = 0;
+      l.videoStartedAt = Date.now();
+      l.mediaPlaying = true;
+      l.mediaEpoch++;
+      break;
+    case "videoAudio":
+      if (q?.category !== "video") break;
+      if (a.volume !== undefined) {
+        if (!Number.isFinite(a.volume) || a.volume < 0 || a.volume > 1)
+          throw Error("Âm lượng không hợp lệ.");
+        l.videoVolume = a.volume;
+      }
+      if (a.muted !== undefined) {
+        if (typeof a.muted !== "boolean")
+          throw Error("Trạng thái âm thanh không hợp lệ.");
+        l.videoMuted = a.muted;
+      }
       break;
     case "mode":
       if (!["welcome", "score"].includes(a.mode))
@@ -439,6 +550,10 @@ export function act(old, a) {
     default:
       throw Error("Thao tác không hợp lệ.");
   }
+  if (["saveQuestion", "move", "duplicate"].includes(a.type))
+    s.questions.sort(
+      (a, b) => categories.indexOf(a.category) - categories.indexOf(b.category),
+    );
   const reasons = {
     correct: "Trả lời đúng",
     teams: "Điều chỉnh thủ công",
@@ -454,7 +569,7 @@ export function validate(s) {
   const str = (x, max = 10000) => typeof x === "string" && x.length <= max;
   if (
     !s ||
-    s.version !== 3 ||
+    s.version !== 4 ||
     !Array.isArray(s.questions) ||
     s.questions.length > 300 ||
     !Array.isArray(s.teams) ||
@@ -467,7 +582,13 @@ export function validate(s) {
       !str(q.id, 100) ||
       ids.has(q.id) ||
       !categories.includes(q.category) ||
-      !["choice", "open"].includes(q.type) ||
+      !["choice", "open", "video"].includes(q.type) ||
+      (q.category === "video") !== (q.type === "video") ||
+      (q.category === "video" &&
+        (q.media.length > 1 ||
+          q.media.some(
+            (m) => m.kind !== "video" || !m.file.endsWith(".mp4"),
+          ))) ||
       (q.category === "special" && q.type !== "open") ||
       !str(q.title) ||
       !str(q.hint) ||
@@ -532,7 +653,9 @@ export function validate(s) {
     ) ||
     !(Number.isInteger(l.nextTeam) && l.nextTeam >= 0 && l.nextTeam < 4) ||
     !(l.questionId === null || ids.has(l.questionId)) ||
-    !["welcome", "waiting", "question", "score", "winner"].includes(l.mode) ||
+    !["welcome", "waiting", "question", "video", "score", "winner"].includes(
+      l.mode,
+    ) ||
     !Array.isArray(l.failed) ||
     !l.failed.every((n) => Number.isInteger(n) && n >= 0 && n < 4) ||
     !Array.isArray(l.awarded) ||
@@ -546,6 +669,13 @@ export function validate(s) {
       (k) => typeof l[k] === "boolean",
     ) ||
     !Number.isFinite(l.mediaEpoch) ||
+    !Number.isFinite(l.videoPosition) ||
+    l.videoPosition < 0 ||
+    !(l.videoStartedAt === null || Number.isFinite(l.videoStartedAt)) ||
+    !Number.isFinite(l.videoVolume) ||
+    l.videoVolume < 0 ||
+    l.videoVolume > 1 ||
+    typeof l.videoMuted !== "boolean" ||
     !["", "correct", "incorrect", "giveup", "skipped", "revealed"].includes(
       l.feedback,
     )
@@ -627,12 +757,14 @@ export function audience(s) {
                 title: q.title,
                 type: q.type,
                 category: q.category,
-                options: q.options,
+                options: q.category === "video" ? undefined : q.options,
                 media: q.media,
-                ...(s.live.hint && q.hintEnabled
+                ...(q.category !== "video" && s.live.hint && q.hintEnabled
                   ? { hint: q.hint, hintMedia: q.hintMedia }
                   : {}),
-                ...(s.live.reveal
+                ...(s.live.mode === "question" &&
+                s.live.reveal &&
+                q.category !== "video"
                   ? {
                       correct: q.correct,
                       answer: q.answer,

@@ -5,8 +5,9 @@ const $ = (s) => document.querySelector(s),
 const cats = {
   mv: "Trong MV",
   other: "Chủ đề khác",
-  special: "Siêu khó",
   backup: "Dự phòng",
+  special: "Siêu khó",
+  video: "Video đặc biệt",
 };
 const esc = (x) =>
   String(x ?? "").replace(
@@ -104,6 +105,8 @@ function mediaHTML(q, area = "question") {
 }
 function stage(q, l = state.live) {
   const settings = state.settings;
+  if (l.mode === "video")
+    return `<div class="closing-video">${q?.media?.length ? mediaHTML(q) : "<p>Chưa có video. Hãy tải tệp MP4 trong Quản lý câu hỏi.</p>"}</div>`;
   let content = "";
   if (l.mode === "winner")
     content = `<div class="flourish">✦</div><p class="eyebrow">${l.winnerKind === "individual" ? esc(settings.prize) : "Khoảnh khắc vinh danh"}</p><h1>${esc(l.winner || "Xin chúc mừng!")}</h1><p class="subtitle">Cảm ơn bạn đã cùng tạo nên một ngày thật đặc biệt.</p>`;
@@ -114,7 +117,7 @@ function stage(q, l = state.live) {
   else if (l.mode === "welcome" || !q)
     content = `<div class="flourish">✳</div><p class="eyebrow">Chào mừng ngày Phụ nữ Việt Nam</p><h1>${esc(settings.title)}</h1><p class="subtitle">20 / 10 &nbsp; • &nbsp; Cùng chơi, cùng tỏa sáng</p>`;
   else
-    content = `<p class="eyebrow">${q.category === "special" ? "✦ " + esc(settings.prize) : esc(cats[q.category])} ${l.freeForAll ? " • ⚡ Tự do giành quyền trả lời!" : ""}</p><h2 class="question-title">${esc(q.title)}</h2>${mediaHTML(q)}${q.type === "choice" ? `<div class="options">${q.options.map((o, i) => `<div class="option ${q.correct === i ? "correct" : ""}"><b>${String.fromCharCode(65 + i)}</b>${esc(o)}</div>`).join("")}</div>` : ""}${q.hint !== undefined ? `<section class="hint-block"><p class="hint">✧ ${esc(q.hint)}</p>${mediaHTML({ media: q.hintMedia }, "hint")}</section>` : ""}${q.answer !== undefined ? `<p class="hint">Đáp án: ${esc(q.type === "open" ? q.answer : q.options[q.correct])}</p><p class="subtitle">${esc(q.explanation)}</p>` : ""}${l.feedback ? `<div class="feedback ${l.feedback === "incorrect" ? "bad" : ""}">${{ correct: "✓ Chính xác! Xin chúc mừng", incorrect: l.settled ? "Sai rồi!" : "Chưa chính xác!", revealed: "Đã công bố đáp án", giveup: "Đã chuyển cơ hội trả lời", skipped: "Đã bỏ qua câu hỏi" }[l.feedback]}</div>` : ""}${q.category === "special" ? `<p class="subtitle">${esc(settings.specialRules)}</p>` : ""}`;
+    content = `<p class="eyebrow">${q.category === "special" ? "✦ " + esc(settings.prize) : esc(cats[q.category])} ${l.freeForAll ? " • ⚡ Tự do giành quyền trả lời!" : ""}</p><h2 class="question-title">${esc(q.title)}</h2>${mediaHTML(q)}${q.type === "choice" ? `<div class="options">${q.options.map((o, i) => `<div class="option ${l.reveal && q.correct === i ? "correct" : ""}"><b>${String.fromCharCode(65 + i)}</b>${esc(o)}</div>`).join("")}</div>` : ""}${q.hint !== undefined ? `<section class="hint-block"><p class="hint">✧ ${esc(q.hint)}</p>${mediaHTML({ media: q.hintMedia }, "hint")}</section>` : ""}${l.reveal && q.answer !== undefined ? `<p class="hint">Đáp án: ${esc(q.type === "open" ? q.answer : q.options[q.correct])}</p><p class="subtitle">${esc(q.explanation)}</p>` : ""}${l.feedback ? `<div class="feedback ${l.feedback === "incorrect" ? "bad" : ""}">${{ correct: "✓ Chính xác! Xin chúc mừng", incorrect: l.settled ? "Sai rồi!" : "Chưa chính xác!", revealed: "Đã công bố đáp án", giveup: "Đã chuyển cơ hội trả lời", skipped: "Đã bỏ qua câu hỏi" }[l.feedback]}</div>` : ""}${q.category === "special" ? `<p class="subtitle">${esc(settings.specialRules)}</p>` : ""}`;
   return `<div class="preview ${q?.category === "special" && l.mode !== "welcome" ? "special" : ""}">${content}</div>`;
 }
 function render() {
@@ -153,7 +156,7 @@ function render() {
     )
     .join(
       "",
-    )}<div class="bottom"><span class="dot"></span>Chạy cục bộ · Ngoại tuyến<br>Dữ liệu tự động lưu trên máy<br><span class="muted">Phiên bản 2.1 • Dành cho 20/10</span></div></aside><main class="main"><header class="top"><div><p class="eyebrow">Không gian tổ chức</p><h1>${titles[tab][0]}</h1><p class="muted">${titles[tab][1]}</p></div><div class="row">${button("HOÀN TÁC", "undo", "", state.undoCount ? "" : "disabled")}<a class="button" href="/audience" target="audience">↗ Mở màn hình TV</a></div></header>${draft ? editor() : { live: livePage, questions: questionsPage, settings: settingsPage, help: helpPage }[tab]()}</main></div>`;
+    )}<div class="bottom"><span class="dot"></span>Chạy cục bộ · Ngoại tuyến<br>Dữ liệu tự động lưu trên máy<br><span class="muted">Phiên bản 2.1.1 • Dành cho 20/10</span></div></aside><main class="main"><header class="top"><div><p class="eyebrow">Không gian tổ chức</p><h1>${titles[tab][0]}</h1><p class="muted">${titles[tab][1]}</p></div><div class="row">${button("HOÀN TÁC", "undo", "", state.undoCount ? "" : "disabled")}<a class="button" href="/audience" target="audience">↗ Mở màn hình TV</a></div></header>${draft ? editor() : { live: livePage, questions: questionsPage, settings: settingsPage, help: helpPage }[tab]()}</main></div>`;
   if (preserveLiveInput) {
     const input = $("#" + preserveLiveInput.id);
     if (input) {
@@ -176,7 +179,7 @@ function renderTV() {
         wasPlaying: !el.paused,
       }),
   );
-  app.innerHTML = `<main class="audience"><div class="audience-tools" ${previewOnly ? "hidden" : ""}>${button(document.fullscreenElement ? "Thoát toàn màn hình" : "Toàn màn hình", "fullscreen", "", `aria-pressed="${Boolean(document.fullscreenElement)}"`)}${button("Bật âm thanh", "sound")}</div><div class="stage"><div class="stage-timer" data-clock></div>${stage(q)}<div class="score-strip">${state.teams.map((t, i) => `<div class="${q?.category !== "special" && l.team === i ? "current" : ""}"><span>${q?.category !== "special" && l.team === i ? "● " : ""}${esc(t.name)}</span><b>${t.score}</b></div>`).join("")}</div>${q?.category === "special" ? '<div class="individual-label">Vòng cá nhân · Không cộng điểm tổ</div>' : ""}</div></main>`;
+  app.innerHTML = `<main class="audience ${l.mode === "video" ? "video-mode" : ""}"><div class="audience-tools" ${previewOnly ? "hidden" : ""}>${button(document.fullscreenElement ? "Thoát toàn màn hình" : "Toàn màn hình", "fullscreen", "", `aria-pressed="${Boolean(document.fullscreenElement)}"`)}${button("Bật âm thanh", "sound")}</div>${l.mode === "video" ? stage(q) : `<div class="stage"><div class="stage-timer" data-clock></div>${stage(q)}<div class="score-strip">${state.teams.map((t, i) => `<div class="${q?.category !== "special" && l.team === i ? "current" : ""}"><span>${q?.category !== "special" && l.team === i ? "● " : ""}${esc(t.name)}</span><b>${t.score}</b></div>`).join("")}</div>${q?.category === "special" ? '<div class="individual-label">Vòng cá nhân · Không cộng điểm tổ</div>' : ""}</div>`}</main>`;
   document.querySelectorAll("video,audio").forEach((el) => {
     const area = el.dataset.area,
       old = mediaKey === newKey ? saved[area + el.getAttribute("src")] : null;
@@ -184,7 +187,24 @@ function renderTV() {
       el.replaceWith(old.el);
       el = old.el;
     }
-    if (previewOnly) el.muted = true;
+    if (l.mode === "video") {
+      el.muted = previewOnly || l.videoMuted;
+      el.volume = l.videoVolume;
+      if (!old || lastMediaEpoch !== l.mediaEpoch) {
+        const seek = () => {
+          const target =
+            l.videoPosition +
+            (l.videoStartedAt === null
+              ? 0
+              : Math.max(0, Date.now() + offset - l.videoStartedAt) / 1000);
+          el.currentTime = Number.isFinite(el.duration)
+            ? Math.min(target, el.duration)
+            : target;
+        };
+        if (el.readyState >= 1) seek();
+        else el.addEventListener("loadedmetadata", seek, { once: true });
+      }
+    } else if (previewOnly) el.muted = true;
     const playing = area === "hint" ? l.hintPlaying : l.mediaPlaying,
       epoch = area === "hint" ? l.hintEpoch : l.mediaEpoch,
       previous = area === "hint" ? lastHintEpoch : lastMediaEpoch;
@@ -238,14 +258,15 @@ function livePage() {
     active = shown && !l.settled && (special || l.team !== null);
   const index = state.questions.findIndex((x) => x.id === q?.id),
     selected = q?.id;
+  if (q?.category === "video") return videoLivePage(q, index);
   return `<div class="question-picker"><select id="select-q" aria-label="Chọn câu hỏi">${state.questions.map((q, i) => `<option value="${q.id}" ${q.id === selected ? "selected" : ""}>${i + 1}. [${cats[q.category]}] ${esc(q.title)}</option>`).join("")}</select>${button("HIỆN CÂU HỎI", "show", "primary", !q ? "disabled" : "")}${button("CÂU TRƯỚC", "previous", "", index <= 0 ? "disabled" : "")}${button("CÂU TIẾP THEO", "next", "", index >= state.questions.length - 1 ? "disabled" : "")}</div>
  <div class="team-selectors compact-teams">${state.teams.map((t, i) => `<div class="team-box ${l.team === i && !special ? "active" : ""}">${button(`<b>Tổ ${i + 1}</b><small>${t.name === `Tổ ${i + 1}` ? "" : esc(t.name)}</small>`, "team", "team-choose", `data-index="${i}" ${special ? "disabled" : ""}`)}<div class="score-adjust">${button("−", "adjustScore", "", `data-index="${i}" data-delta="-1" aria-label="Trừ điểm Tổ ${i + 1}"`)}<strong>${t.score} điểm</strong>${button("+", "adjustScore", "", `data-index="${i}" data-delta="1" aria-label="Cộng điểm Tổ ${i + 1}"`)}</div></div>`).join("")}</div>
  <div class="live-status" role="status"><span class="dot"></span>${liveStatus()}<span class="badge">${special ? "Cá nhân" : l.team === null ? "Chưa chọn tổ" : esc(state.teams[l.team].name)}</span></div>
  <div class="operator-layout"><section class="panel answer-console"><p class="eyebrow">Riêng Admin · Câu ${index + 1}</p><h2 class="live-question">${esc(q?.title || "Chưa có câu hỏi")}</h2>
  ${q?.type === "choice" ? `<p class="muted small-note">Bấm phương án để chấm ngay.</p><div class="answer-buttons">${q.options.map((o, i) => button(`<b>${String.fromCharCode(65 + i)}</b> ${esc(o)}${i === q.correct ? '<small class="correct-badge">✓ Đáp án đúng</small>' : ""}`, "chooseOption", `answer-button ${i === q.correct ? "stored-correct" : ""} ${l.selectedOption === i ? "selected" : ""}`, `data-index="${i}" ${!active ? "disabled" : ""}`)).join("")}</div>` : `<div class="reference-answer"><b>Đáp án tham khảo</b><p>${esc(q?.answer)}</p></div><div class="judge-buttons">${button(special ? "ĐÚNG / CHỐT ĐÁP ÁN" : "ĐÚNG (+1)", "correct", "correct-button", !active ? "disabled" : "")}${button("SAI (0 ĐIỂM)", "incorrect", "bad", !active ? "disabled" : "")}</div>`}
  <div class="answer-explanation"><b>Giải thích đáp án</b><p>${esc(q?.explanation || "Chưa có giải thích.")}</p></div></section>
- <section class="center-tv"><p class="eyebrow">ĐANG TRÊN TV</p><div class="tv-preview-mount"></div><div class="row central-controls">${button("CHỊU THUA / CHUYỂN TỔ", "giveup", "", !active || special ? "disabled" : "")}${q?.hintEnabled ? button(l.hint ? "ẨN GỢI Ý" : "HIỆN GỢI Ý", "hint", "", !shown ? "disabled" : "") : ""}${button(l.reveal ? "ĐÃ HIỆN ĐÁP ÁN" : "HIỆN ĐÁP ÁN", "reveal", "", !shown || l.settled ? "disabled" : "")}</div><p class="muted small-note">${l.freeForAll ? "Chọn tổ giơ tay trước. Sai vẫn ẩn đáp án để tổ khác thử." : q?.category === "backup" ? "Dự phòng: chọn bất kỳ tổ nào; sai vẫn giữ kín đáp án." : special ? "Trả lời sai vẫn được thử tiếp. Chấm đúng không cộng điểm tổ." : "Lượt thường: chọn đáp án sẽ chốt câu và công bố đáp án ngay."}</p></section>
- <aside class="live-side"><div class="panel timer-panel"><div class="row spread"><h3>Đồng hồ</h3><label class="inline"><input id="liveTimerEnabled" type="checkbox" ${state.settings.timerEnabled ? "checked" : ""}> Sử dụng</label></div>${state.settings.timerEnabled ? `<div class="timer" data-clock></div><div class="row"><input id="liveSeconds" type="number" min="5" max="3600" value="${state.settings.seconds}" aria-label="Thời gian trả lời">${button("Áp dụng", "duration")}</div><div class="row">${button(l.deadline ? "Tạm dừng" : l.remaining < state.settings.seconds * 1000 && l.remaining > 0 ? "Tiếp tục" : "Bắt đầu", "timer", "primary", !shown || l.settled ? "disabled" : "")}${button("Đặt lại", "resetTimer")}</div>` : '<p class="muted">Đồng hồ đã tắt.</p>'}</div>
+ <section class="center-tv"><p class="eyebrow">ĐANG TRÊN TV</p><div class="tv-preview-mount"></div><div class="row central-controls">${button("CHỊU THUA / CHUYỂN TỔ", "giveup", "", !active || special ? "disabled" : "")}${q?.hintEnabled ? button(l.hint ? "ẨN GỢI Ý" : "HIỆN GỢI Ý", "hint", "", !shown ? "disabled" : "") : ""}${button(l.reveal ? "ĐÃ HIỆN ĐÁP ÁN" : "HIỆN ĐÁP ÁN", "reveal", "", !shown || l.reveal ? "disabled" : "")}</div><p class="muted small-note">${l.freeForAll ? "Chọn tổ giơ tay trước. Sai vẫn ẩn đáp án để tổ khác thử." : q?.category === "backup" ? "Dự phòng: chọn bất kỳ tổ nào; sai vẫn giữ kín đáp án." : special ? "Trả lời sai vẫn được thử tiếp. Chấm đúng không cộng điểm tổ." : "Lượt thường: chọn đáp án sẽ chốt câu và công bố đáp án ngay."}</p></section>
+ <aside class="live-side"><div class="panel timer-panel"><div class="row spread"><h3>Đồng hồ</h3><label class="inline"><input id="liveTimerEnabled" type="checkbox" ${state.settings.timerEnabled ? "checked" : ""}> Sử dụng</label></div>${state.settings.timerEnabled ? `<div class="timer" data-clock></div><div class="row"><input id="liveSeconds" type="number" min="5" max="3600" value="${state.settings.seconds}" aria-label="Thời gian trả lời">${button("Áp dụng", "duration")}</div><div class="row">${button(l.deadline ? "Tạm dừng" : l.remaining < state.settings.seconds * 1000 && l.remaining > 0 ? "Tiếp tục" : "Bắt đầu", "timer", "primary", !shown ? "disabled" : "")}${button("Đặt lại", "resetTimer")}</div>` : '<p class="muted">Đồng hồ đã tắt.</p>'}</div>
  <div class="panel media-controls"><h3>Trình chiếu & âm thanh</h3><div class="row">${button("Màn hình chào", "welcome")}${button("Bảng điểm", "scoreMode")}${button("🏆 CÔNG BỐ VÔ ĐỊCH", "announceTeam", "primary")}${q?.media.some((m) => m.kind !== "image") ? button(l.mediaPlaying ? "Dừng tệp câu hỏi" : "Phát tệp câu hỏi", "media", "", !shown ? "disabled" : "") : ""}${q?.hintEnabled && q.hintMedia.some((m) => m.kind !== "image") ? button(l.hintPlaying ? "Dừng tệp gợi ý" : "Phát tệp gợi ý", "hintMedia", "", !shown || !l.hint ? "disabled" : "") : ""}</div></div></aside></div>
  <details class="score-history-details"><summary>Lịch sử điều chỉnh điểm</summary><div class="score-history">${
    state.scoreLog
@@ -257,6 +278,25 @@ function livePage() {
      )
      .join("") || "<p>Chưa có thay đổi điểm.</p>"
  }</div></details>`;
+}
+function videoLivePage(q, index) {
+  const l = state.live,
+    shown = l.mode === "video";
+  return `<div class="question-picker"><select id="select-q" aria-label="Chọn câu hỏi">${state.questions.map((x, i) => `<option value="${x.id}" ${x.id === q.id ? "selected" : ""}>${i + 1}. [${cats[x.category]}] ${esc(x.title)}</option>`).join("")}</select>${button("HIỆN VIDEO", "show", "primary")}${button("CÂU TRƯỚC", "previous", "", index <= 0 ? "disabled" : "")}${button("CÂU TIẾP THEO", "next", "", index >= state.questions.length - 1 ? "disabled" : "")}</div>
+  <div class="panel"><p class="eyebrow">Video đặc biệt</p><h2>${esc(q.title)}</h2><p>${shown ? "Đang trình chiếu video trên TV" : "Bấm HIỆN VIDEO để phát trên TV"}</p>
+  <p class="eyebrow">ĐANG TRÊN TV</p><div class="tv-preview-mount"></div>
+  <div class="row">${button(l.mediaPlaying && shown ? "Tạm dừng" : "Phát", "videoPlayback", "primary", shown ? "" : "disabled")}${button("Phát lại từ đầu", "videoRestart", "", shown ? "" : "disabled")}
+  <label>Âm lượng <input id="videoVolume" aria-label="Âm lượng video" type="range" min="0" max="1" step="0.05" value="${l.videoVolume}"></label>
+  ${button(l.videoMuted ? "Bật tiếng" : "Tắt tiếng", "videoMute")}${button("Màn hình chào", "welcome")}</div>
+  <p class="muted">Tải video MP4 ở Quản lý câu hỏi. Bấm Bật âm thanh một lần trên cửa sổ TV nếu trình duyệt yêu cầu. Khung xem trước luôn tắt tiếng.</p></div>`;
+}
+function videoEditor() {
+  return `<div class="panel"><div class="row spread"><h2>Biên tập Video đặc biệt</h2><div class="row">${button("Lưu câu hỏi", "save", "primary")}${button("Hủy", "cancel")}</div></div>
+  <label for="category">Nhóm / Loại</label><select id="category" disabled><option value="video">Video đặc biệt</option></select>
+  <label for="title">Tiêu đề video</label><textarea id="title" maxlength="10000">${esc(draft.title)}</textarea>
+  <label for="upload">Video MP4 từ máy tính</label><input id="upload" type="file" accept=".mp4,video/mp4">
+  <p class="muted">Một video MP4, tối đa 100 MB. Tải tệp mới sẽ thay tệp đang chọn khi lưu.</p>
+  <div class="row">${draft.media.map((m, i) => `<span class="media-chip">${esc(m.name)} ${button("×", "removeMedia", "", `data-index="${i}" aria-label="Gỡ tệp"`)}</span>`).join("")}</div></div>`;
 }
 // The preview runs the actual audience renderer and public projection, muted.
 // Keep its frame mounted across Admin renders so media does not restart on clicks.
@@ -304,9 +344,10 @@ function questionsPage() {
     )
     .join(
       " · ",
-    )}</span>${button("+ Thêm câu hỏi", "new", "primary")}</div><div class="notice">Các câu hỏi ban đầu là nội dung giữ chỗ. Hãy thay nội dung và kiểm tra đáp án trước sự kiện.</div><div class="question-list">${state.questions.map((q, i) => `<div class="question-row"><span class="num">${String(i + 1).padStart(2, "0")}</span><div class="text"><strong>${esc(q.title)}</strong><span class="badge">${cats[q.category]}</span> <small>${q.type === "choice" ? "Trắc nghiệm" : "Tự luận"} · ${q.media.length} tệp</small></div>${button("↑", "up", "", `data-id="${q.id}" aria-label="Chuyển lên" ${i === 0 ? "disabled" : ""}`)}${button("↓", "down", "", `data-id="${q.id}" aria-label="Chuyển xuống" ${i === state.questions.length - 1 ? "disabled" : ""}`)}${button("Sửa", "edit", "", `data-id="${q.id}"`)}${button("Nhân bản", "duplicate", "", `data-id="${q.id}"`)}${button("Xóa", "delete", "bad", `data-id="${q.id}"`)}</div>`).join("")}</div>`;
+    )}</span>${button("+ Thêm câu hỏi", "new", "primary")}</div><div class="notice">Các câu hỏi ban đầu là nội dung giữ chỗ. Hãy thay nội dung và kiểm tra đáp án trước sự kiện.</div><div class="question-list">${state.questions.map((q, i) => `<div class="question-row"><span class="num">${String(i + 1).padStart(2, "0")}</span><div class="text"><strong>${esc(q.title)}</strong><span class="badge">${cats[q.category]}</span> <small>${q.type === "video" ? "Video đặc biệt" : q.type === "choice" ? "Trắc nghiệm" : "Tự luận"} · ${q.media.length} tệp</small></div>${button("↑", "up", "", `data-id="${q.id}" aria-label="Chuyển lên" ${i === 0 || state.questions[i - 1].category !== q.category ? "disabled" : ""}`)}${button("↓", "down", "", `data-id="${q.id}" aria-label="Chuyển xuống" ${i === state.questions.length - 1 || state.questions[i + 1].category !== q.category ? "disabled" : ""}`)}${button("Sửa", "edit", "", `data-id="${q.id}"`)}${button("Nhân bản", "duplicate", "", `data-id="${q.id}"`)}${button("Xóa", "delete", "bad", `data-id="${q.id}"`)}</div>`).join("")}</div>`;
 }
 function editor() {
+  if (draft.category === "video") return videoEditor();
   return `<div class="panel"><div class="row spread"><h2>Biên tập câu hỏi</h2><div class="row">${button("Xem trước", "preview")}${button("Hủy", "cancel")}${button("Lưu câu hỏi", "save", "primary")}</div></div><div class="editor-grid"><section><label for="title">Nội dung câu hỏi</label><textarea id="title" maxlength="10000">${esc(draft.title)}</textarea><label for="category">Nhóm câu hỏi</label><select id="category">${Object.entries(
     cats,
   )
@@ -320,6 +361,10 @@ function editor() {
 }
 function capture() {
   if (!draft) return;
+  if (draft.category === "video" && !$("#type")) {
+    draft.title = $("#title").value;
+    return;
+  }
   for (const k of [
     "title",
     "category",
@@ -340,7 +385,7 @@ function settingsPage() {
   return `<div class="editor-grid"><div class="panel"><h2>Thể lệ linh hoạt</h2><label for="seconds">Thời gian mỗi lượt (5–3600 giây)</label><input id="seconds" type="number" min="5" max="3600" value="${s.seconds}"><label><input id="autoPass" type="checkbox" ${s.autoPass ? "checked" : ""}> Tự chuyển đội khi hết giờ</label><label><input id="timerEnabled" type="checkbox" ${s.timerEnabled ? "checked" : ""}> Sử dụng đồng hồ</label><label><input id="warningSound" type="checkbox" ${s.warningSound ? "checked" : ""}> Âm báo khi hết giờ trên TV (bấm Bật âm thanh trên TV trước)</label><p class="notice">Câu thường và dự phòng: đúng +1. Siêu khó: không cộng điểm tổ. Bốn tổ chịu thua sẽ tự mở vòng tự do.</p><label for="specialRules">Thể lệ câu đặc biệt (hiện trên TV)</label><textarea id="specialRules" maxlength="2000">${esc(s.specialRules)}</textarea></div><div class="panel"><h2>Không gian trình chiếu</h2>${state.teams.map((t, i) => `<label for="teamname${i}">Tên tổ ${i + 1}</label><input id="teamname${i}" maxlength="100" value="${esc(t.name)}">`).join("")}${button("Lưu tên tổ", "saveTeams")}<label for="eventTitle">Thông điệp màn hình chào</label><input id="eventTitle" maxlength="2000" value="${esc(s.title)}"><label for="prize">Tên giải thưởng đặc biệt</label><input id="prize" maxlength="2000" value="${esc(s.prize)}"><label for="accent">Màu nhấn</label><input id="accent" type="color" value="${s.accent}"><div class="notice">Sau khi đổi thời gian, bấm “Đặt lại” đồng hồ để áp dụng cho lượt đang mở.</div>${button("Lưu thiết lập", "saveSettings", "primary")}</div></div><div class="panel"><h2>Dữ liệu & sao lưu</h2><p class="muted">Lưu bản sao vào USB trước sự kiện. Giữ tổng dữ liệu dưới 140 MB để có thể khôi phục bằng tệp sao lưu (giới hạn 200 MB).</p><div class="row"><a class="button" href="/api/backup" download>Sao lưu toàn bộ</a><label style="margin:0">Khôi phục từ bản sao<input id="restore" type="file" accept=".json"></label>${button("Bắt đầu sự kiện mới", "reset", "bad")}</div><p class="muted"><small>Bắt đầu mới đặt lại điểm và tiến trình, giữ câu hỏi, tệp và thiết lập. Có thể hoàn tác.</small></p></div>`;
 }
 function helpPage() {
-  return `<div class="panel help"><h2>Chuẩn bị và điều khiển</h2><ol><li><b>Quản lý câu hỏi:</b> bản cài mới gồm 8 câu Trong MV, 4 Chủ đề khác, 1 Siêu khó tự luận, 5 Dự phòng. Câu phân định hòa cũ được chuyển sang Dự phòng, không xóa nội dung. Vì vậy dữ liệu cũ có thể nhiều hơn 18 câu.</li><li><b>Chuẩn bị câu:</b> chọn từ danh sách hoặc bấm CÂU TRƯỚC / CÂU TIẾP THEO. TV chỉ hiện Chuẩn bị..., số câu và nhóm; Admin đã thấy câu, đáp án đúng và giải thích. Chỉ bấm HIỆN CÂU HỎI mới đưa nội dung lên TV.</li><li><b>Chấm trắc nghiệm:</b> bấm ngay A/B/C/D theo câu trả lời. Lượt thường: đúng +1, sai +0; cả hai đều công bố đáp án và kết thúc câu. Không có bước xác nhận thứ hai. Tự luận dùng ĐÚNG / SAI.</li><li><b>Chuyển lượt:</b> CHỊU THUA không lộ đáp án, chuyển sang tổ tiếp theo. Bốn tổ khác nhau cùng chịu thua sẽ tự mở ⚡ Tự do giành quyền trả lời! và bỏ chọn tổ. Bấm tổ giơ tay trước rồi chấm; sai vẫn ẩn đáp án, bỏ chọn tổ để tổ khác thử. Đúng hoặc HIỆN ĐÁP ÁN sẽ kết thúc câu.</li><li><b>Sang câu kế:</b> câu thường tiếp theo bắt đầu từ tổ sau tổ vừa chốt đáp án, kể cả chốt sai. Ví dụ Tổ 2 trả lời cuối cùng → câu tiếp bắt đầu Tổ 3. Có thể bấm chọn tổ để đổi lượt bất kỳ lúc nào.</li></ol><h2>Dự phòng và Siêu khó</h2><p>Dự phòng dùng để phân định hòa hoặc chơi thêm: chọn tổ giơ tay trước, đúng +1 và công bố đáp án; sai giữ kín và cho tổ khác thử. HIỆN ĐÁP ÁN chốt câu nếu không ai trả lời được.</p><p>Siêu khó dành cho cá nhân, luôn tự luận. SAI giữ kín đáp án và tiếp tục; ĐÚNG / CHỐT ĐÁP ÁN công bố đáp án và phản hồi chúc mừng. Không cộng điểm tổ, không cần nhập tên người thắng.</p><h2>Điểm và trình chiếu</h2><p>Chỉnh điểm bằng − / + ngay trong thẻ tổ, không làm đổi tổ đang trả lời. HOÀN TÁC phục hồi thao tác vừa nhầm. Mỗi câu đã kết thúc không thể chấm lại khi quay về; muốn sửa hãy hoàn tác hoặc chỉnh điểm. Công bố tổ có điểm cao nhất bằng 🏆 CÔNG BỐ VÔ ĐỊCH. Nếu hòa, dùng câu Dự phòng trước.</p><p>Khung ĐANG TRÊN TV dùng cùng giao diện TV, gồm trạng thái chờ, câu, đáp án đã công bố, điểm và đồng hồ; video xem trước tắt tiếng để tránh âm thanh lặp. Thông tin đúng/sai riêng của Admin không xuất hiện ở đó trước khi được công bố theo luật.</p><p>Gợi ý chỉ hiện khi MC bật, không trừ điểm. Tắt Có gợi ý trong biên tập vẫn giữ nội dung và tệp. Đồng hồ có thể tắt, đổi thời gian, dừng/tiếp tục. Mặc định hết giờ không chốt câu; tự chuyển và âm báo là tùy chọn trong Thiết lập.</p><h2>TV và dữ liệu</h2><p>Kết nối HDMI → Windows + P → Mở rộng. Mở màn hình TV và kéo sang TV; Toàn màn hình mở/thoát hai chiều, Esc để thoát. Bấm Bật âm thanh một lần rồi điều khiển phát từ Admin. Giữ cửa sổ khởi động mở. Sao lưu toàn bộ trước khi nâng cấp; giải nén bản mới vào thư mục riêng rồi Khôi phục từ bản sao. Không xóa dữ liệu bản cũ.</p></div>`;
+  return `<div class="panel help"><h2>Chuẩn bị và điều khiển</h2><ol><li><b>Quản lý câu hỏi:</b> bản cài mới gồm 8 câu Trong MV (1–8), 4 Chủ đề khác (9–12), 5 Dự phòng (13–17), Siêu khó tự luận (18), Video đặc biệt (19). Câu phân định hòa cũ được chuyển sang Dự phòng, không xóa nội dung. Vì vậy dữ liệu cũ có thể nhiều hơn 19 mục.</li><li><b>Chuẩn bị câu:</b> chọn từ danh sách hoặc bấm CÂU TRƯỚC / CÂU TIẾP THEO. TV chỉ hiện Chuẩn bị..., số câu và nhóm; Admin đã thấy câu, đáp án đúng và giải thích. Chỉ bấm HIỆN CÂU HỎI mới đưa nội dung lên TV.</li><li><b>Chấm trắc nghiệm:</b> bấm ngay A/B/C/D theo câu trả lời. Lượt thường: đúng +1, sai +0; cả hai đều công bố đáp án và kết thúc câu. Không có bước xác nhận thứ hai. Tự luận dùng ĐÚNG / SAI.</li><li><b>Chuyển lượt:</b> CHỊU THUA không lộ đáp án, chuyển sang tổ tiếp theo. Bốn tổ khác nhau cùng chịu thua sẽ tự mở ⚡ Tự do giành quyền trả lời! và bỏ chọn tổ. Bấm tổ giơ tay trước rồi chấm; sai vẫn ẩn đáp án, bỏ chọn tổ để tổ khác thử. Đúng hoặc HIỆN ĐÁP ÁN sẽ kết thúc câu.</li><li><b>Sang câu kế:</b> câu thường tiếp theo bắt đầu từ tổ sau tổ vừa chốt đáp án, kể cả chốt sai. Ví dụ Tổ 2 trả lời cuối cùng → câu tiếp bắt đầu Tổ 3. Có thể bấm chọn tổ để đổi lượt bất kỳ lúc nào.</li></ol><h2>Dự phòng và Siêu khó</h2><p>Dự phòng dùng để phân định hòa hoặc chơi thêm: chọn tổ giơ tay trước, đúng +1 và công bố đáp án; sai giữ kín và cho tổ khác thử. HIỆN ĐÁP ÁN chốt câu nếu không ai trả lời được.</p><p>Siêu khó dành cho cá nhân, luôn tự luận. SAI giữ kín đáp án và tiếp tục; ĐÚNG / CHỐT ĐÁP ÁN công bố đáp án và phản hồi chúc mừng. Không cộng điểm tổ, không cần nhập tên người thắng.</p><h2>Điểm và trình chiếu</h2><p>Chỉnh điểm bằng − / + ngay trong thẻ tổ, không làm đổi tổ đang trả lời. HOÀN TÁC phục hồi thao tác vừa nhầm. Mỗi câu đã kết thúc không thể chấm lại khi quay về; muốn sửa hãy hoàn tác hoặc chỉnh điểm. Công bố tổ có điểm cao nhất bằng 🏆 CÔNG BỐ VÔ ĐỊCH. Nếu hòa, dùng câu Dự phòng trước.</p><p>Khung ĐANG TRÊN TV dùng cùng giao diện TV, gồm trạng thái chờ, câu, đáp án đã công bố, điểm và đồng hồ; video xem trước tắt tiếng để tránh âm thanh lặp. Thông tin đúng/sai riêng của Admin không xuất hiện ở đó trước khi được công bố theo luật.</p><p>Gợi ý chỉ hiện khi MC bật, không trừ điểm. Tắt Có gợi ý trong biên tập vẫn giữ nội dung và tệp. Khi bật Sử dụng đồng hồ, HIỆN CÂU HỎI tự đặt lại và chạy đồng hồ. Có thể Tạm dừng, Tiếp tục hoặc Đặt lại. Mỗi lần hiện câu đều giấu đáp án, kể cả câu đã chấm; câu đã chấm không cộng điểm lại, MC dùng HIỆN ĐÁP ÁN để công bố lại. Mặc định hết giờ không chốt câu; tự chuyển và âm báo là tùy chọn trong Thiết lập.</p><h2>Video đặc biệt</h2><p>Mục cuối dành cho video MP4 kết chương trình. Biên tập tiêu đề và tải video tại Quản lý câu hỏi. Bấm HIỆN VIDEO để phát sạch trên TV, không điểm/đồng hồ/khung câu hỏi. Admin có Phát/Tạm dừng, Phát lại từ đầu, âm lượng và tắt tiếng. Khung TV xem trước luôn tắt tiếng.</p><h2>TV và dữ liệu</h2><p>Kết nối HDMI → Windows + P → Mở rộng. Mở màn hình TV và kéo sang TV; Toàn màn hình mở/thoát hai chiều, Esc để thoát. Bấm Bật âm thanh một lần rồi điều khiển phát từ Admin. Giữ cửa sổ khởi động mở. Sao lưu toàn bộ trước khi nâng cấp; giải nén bản mới vào thư mục riêng rồi Khôi phục từ bản sao. Không xóa dữ liệu bản cũ.</p></div>`;
 }
 function updateClock() {
   if (!state) return;
@@ -367,6 +412,10 @@ app.addEventListener("change", async (e) => {
     await action("select", { id: e.target.value });
     return;
   }
+  if (e.target.id === "videoVolume") {
+    await action("videoAudio", { volume: Number(e.target.value) });
+    return;
+  }
   if (e.target.id === "liveTimerEnabled") {
     await action("settings", {
       settings: { ...state.settings, timerEnabled: e.target.checked },
@@ -376,6 +425,7 @@ app.addEventListener("change", async (e) => {
   if (["type", "hintEnabled", "category"].includes(e.target.id)) {
     capture();
     if (draft.category === "special") draft.type = "open";
+    if (draft.category === "video") draft.type = "video";
     render();
   }
   if (e.target.id === "upload" || e.target.id === "hintUpload") {
@@ -384,17 +434,22 @@ app.addEventListener("change", async (e) => {
     busy = true;
     try {
       for (const file of e.target.files) {
-        if (draft[mediaField].length >= 10)
+        if (draft.category === "video" && !/\.mp4$/i.test(file.name))
+          throw Error("Hãy chọn một video MP4.");
+        if (draft.category !== "video" && draft[mediaField].length >= 10)
           throw Error("Tối đa 10 tệp cho mỗi câu.");
         if (file.size > 100 * 1024 * 1024)
           throw Error("Mỗi tệp tối đa 100 MB.");
         toast("Đang lưu tệp: " + file.name);
-        draft[mediaField].push(
-          await request("/api/upload?name=" + encodeURIComponent(file.name), {
+        const uploaded = await request(
+          "/api/upload?name=" + encodeURIComponent(file.name),
+          {
             method: "POST",
             body: file,
-          }),
+          },
         );
+        if (draft.category === "video") draft.media = [uploaded];
+        else draft[mediaField].push(uploaded);
       }
       render();
       toast("Đã tải tệp. Bấm Lưu câu hỏi để hoàn tất.");
@@ -448,7 +503,7 @@ app.addEventListener("click", async (e) => {
       audioContext ||= new AudioContext();
       await audioContext.resume();
       document.querySelectorAll("audio,video").forEach((el) => {
-        el.muted = false;
+        el.muted = state.live.mode === "video" ? state.live.videoMuted : false;
         if (
           el.dataset.area === "hint"
             ? state.live.hintPlaying
@@ -465,6 +520,9 @@ app.addEventListener("click", async (e) => {
       draft = null;
       tab = b.dataset.tab;
       render();
+      break;
+    case "videoMute":
+      await action("videoAudio", { muted: !state.live.videoMuted });
       break;
     case "show":
       await action("show", { id: $("#select-q").value });

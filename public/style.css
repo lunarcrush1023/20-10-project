@@ -1320,3 +1320,42 @@ dialog::backdrop {
     align-items: flex-start;
   }
 }
+
+/* Closing video is the only clean-screen presentation mode. */
+.audience.video-mode {
+  padding: 0;
+  background: #000;
+}
+.closing-video {
+  width: 100%;
+  height: 100vh;
+  background: #000;
+  color: #fff;
+  display: grid;
+  place-items: center;
+}
+.closing-video .media {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  display: block;
+}
+.closing-video video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: contain;
+  border: 0;
+  border-radius: 0;
+}
+.video-mode .audience-tools {
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 10;
+}
+.video-mode .audience-tools:hover,
+.video-mode .audience-tools:focus-within {
+  opacity: 1;
+}

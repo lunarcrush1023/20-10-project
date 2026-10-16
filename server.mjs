@@ -10,6 +10,7 @@ import {
   migrate,
   audience,
   remaining,
+  videoPosition,
 } from "./game.mjs";
 const root = path.dirname(fileURLToPath(import.meta.url)),
   dir = process.env.STUDIO_DATA || path.join(root, "data"),
@@ -24,9 +25,9 @@ if (fs.existsSync(statePath)) {
     const original = fs.readFileSync(statePath, "utf8");
     const parsed = JSON.parse(original);
     state = migrate(parsed);
-    if (parsed.version < 3) {
+    if (parsed.version < 4) {
       fs.writeFileSync(
-        path.join(dir, `before-v3-${Date.now()}.json`),
+        path.join(dir, `before-v4-${Date.now()}.json`),
         original,
         { flag: "wx" },
       );
@@ -36,6 +37,8 @@ if (fs.existsSync(statePath)) {
     state.history = [];
     state.live.remaining = remaining(state);
     state.live.deadline = null;
+    state.live.videoPosition = videoPosition(state);
+    state.live.videoStartedAt = null;
     state.live.mediaPlaying = false;
     state.live.hintPlaying = false;
   } catch (e) {
@@ -163,11 +166,18 @@ const server = http.createServer(async (req, res) => {
         for (const m of [...q.media, ...q.hintMedia])
           files[m.file] = fs.readFileSync(mediaFile(m.file)).toString("base64");
       const data = JSON.stringify({
-        format: "studio-2010-v3",
+        format: "studio-2010-v4",
         state: {
           ...state,
           history: [],
-          live: { ...state.live, remaining: remaining(state), deadline: null },
+          live: {
+            ...state.live,
+            remaining: remaining(state),
+            deadline: null,
+            videoPosition: videoPosition(state),
+            videoStartedAt: null,
+            mediaPlaying: false,
+          },
         },
         files,
       });
@@ -180,9 +190,12 @@ const server = http.createServer(async (req, res) => {
     if (url.pathname === "/api/restore" && req.method === "POST") {
       const b = JSON.parse(await body(req));
       if (
-        !["studio-2010-v1", "studio-2010-v2", "studio-2010-v3"].includes(
-          b.format,
-        ) ||
+        ![
+          "studio-2010-v1",
+          "studio-2010-v2",
+          "studio-2010-v3",
+          "studio-2010-v4",
+        ].includes(b.format) ||
         !b.files ||
         typeof b.files !== "object"
       )
@@ -211,6 +224,8 @@ const server = http.createServer(async (req, res) => {
       b.state.history = [];
       b.state.live.remaining = remaining(b.state);
       b.state.live.deadline = null;
+      b.state.live.videoPosition = videoPosition(b.state);
+      b.state.live.videoStartedAt = null;
       b.state.live.mediaPlaying = false;
       b.state.live.hintPlaying = false;
       save(b.state);
