@@ -2,7 +2,7 @@
 
 Ứng dụng dẫn minigame ngoại tuyến: Admin trên laptop, trình chiếu riêng trên TV. Giao diện hoàn toàn bằng tiếng Việt, không tài khoản ứng dụng, không dịch vụ trả phí, không cần Internet khi tổ chức.
 
-**[Tải bản Windows 2.0](https://github.com/lunarcrush1023/20-10-project/blob/codex/20-10-studio-v2/releases/20-10-Minigame-Studio-2.0.0-Windows.zip?raw=true)** — khoảng 33 MB, có sẵn bộ chạy. Repository riêng tư: đăng nhập GitHub bằng tài khoản có quyền xem kho nếu được yêu cầu. Nếu thấy trang tệp ZIP, bấm **Download raw file**.
+**[Tải bản Windows 2.0](https://github.com/lunarcrush1023/20-10-project/blob/main/releases/20-10-Minigame-Studio-2.0.0-Windows.zip?raw=true)** — khoảng 33 MB, có sẵn bộ chạy. Repository riêng tư: đăng nhập GitHub bằng tài khoản có quyền xem kho nếu được yêu cầu. Nếu thấy trang tệp ZIP, bấm **Download raw file**.
 
 ## Nếu bạn đang dùng bản 1.0 — giữ nguyên dữ liệu cũ
 
