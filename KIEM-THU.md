@@ -1,4 +1,4 @@
-# Kiểm thử 20/10 Minigame Studio 2.2.1 · Theme V4
+# Kiểm thử 20/10 Minigame Studio 2.2.2 · Theme V4
 
 Môi trường: Linux, Node.js, Chromium và Playwright. Chưa chạy trực tiếp trên Windows/TV thật.
 
@@ -19,7 +19,7 @@ Bổ sung V4: dữ liệu schema 4 thiếu programName vẫn hợp lệ và khô
 
 ## Đóng gói
 
-Gói Windows 2.2.1 chứa KHOI-DONG.cmd, runtime Node.js 24.14.0 Windows x64 và mã/tài nguyên ứng dụng. Kiểm tra SHA-256 runtime với SHASUMS chính thức, tính toàn vẹn ZIP và đối chiếu mã trong ZIP với nguồn. Không đưa dữ liệu sự kiện hoặc dữ liệu test vào gói. Giữ nguyên các gói cũ.
+Gói Windows 2.2.2 chứa KHOI-DONG.cmd, runtime Node.js 24.14.0 Windows x64 và mã/tài nguyên ứng dụng. Kiểm tra SHA-256 runtime với SHASUMS chính thức, tính toàn vẹn ZIP và đối chiếu mã trong ZIP với nguồn. Không đưa dữ liệu sự kiện hoặc dữ liệu test vào gói. Giữ nguyên các gói cũ.
 
 ## Giới hạn kiểm thử và vận hành
 
@@ -33,3 +33,5 @@ Gói Windows 2.2.1 chứa KHOI-DONG.cmd, runtime Node.js 24.14.0 Windows x64 và
 - Gói chưa ký số; không tự cập nhật, không gửi dữ liệu ra Internet và không dùng dịch vụ trả phí.
 
 Bản 2.2.1 chỉ đổi tên mặc định về 20/10 Minigame Studio. Đã chạy lại kiểm tra cú pháp, 23 kiểm thử logic, 3 kiểm thử máy chủ và kiểm thử trình duyệt đổi tên/sao lưu/khôi phục. Kiểm tra chuyển tên tạm Vụ Nổ Bé giữ nguyên câu hỏi, tiến trình và tên tùy chỉnh khác.
+
+Bản 2.2.2 sửa cách phân biệt tên: dự án và ZIP là Minigame Studio, trong ứng dụng là Vụ Nổ Bé. Chạy lại kiểm tra cú pháp, logic/lưu trữ và kiểm thử đổi tên trên Admin/TV/Preview. Kiểm tra sửa tên mặc định từ dữ liệu 2.2.1 không đổi câu hỏi hoặc tiến trình.

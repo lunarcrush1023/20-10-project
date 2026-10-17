@@ -1,18 +1,18 @@
-# 20/10 Minigame Studio 2.2.1 · Chuyến Bay Tinh Cầu V4
+# 20/10 Minigame Studio 2.2.2 · Chuyến Bay Tinh Cầu V4
 
 Ứng dụng dẫn minigame ngoại tuyến: Admin trên laptop, trình chiếu riêng trên TV. Giao diện hoàn toàn bằng tiếng Việt, không tài khoản ứng dụng, không dịch vụ trả phí, không cần Internet khi tổ chức.
 
-**[Tải bản Windows 2.2.1](https://github.com/lunarcrush1023/20-10-project/blob/main/releases/20-10-Minigame-Studio-2.2.1-Windows.zip?raw=true)** — khoảng 33 MB, có sẵn bộ chạy. Nếu thấy trang tệp ZIP, bấm **Download raw file**.
+**[Tải bản Windows 2.2.2](https://github.com/lunarcrush1023/20-10-project/blob/main/releases/20-10-Minigame-Studio-2.2.2-Windows.zip?raw=true)** — khoảng 33 MB, có sẵn bộ chạy. Nếu thấy trang tệp ZIP, bấm **Download raw file**.
 
 ## Nếu bạn đang dùng bản 1.0, 2.0, 2.1 hoặc 2.1.1 — giữ nguyên dữ liệu cũ
 
 1. Mở ứng dụng **bản cũ**, vào **Thiết lập → Sao lưu toàn bộ**, lưu tệp JSON ở nơi dễ tìm. Bản sao này chứa câu hỏi, tệp đính kèm, điểm và tiến trình.
-2. Đóng cửa sổ khởi động bản cũ. Tải ZIP 2.2.1 và **giải nén vào thư mục mới**, không xóa thư mục cũ, không mở hai phiên bản cùng lúc.
+2. Đóng cửa sổ khởi động bản cũ. Tải ZIP 2.2.2 và **giải nén vào thư mục mới**, không xóa thư mục cũ, không mở hai phiên bản cùng lúc.
 3. Trong thư mục mới, nhấp đúp **KHOI-DONG.cmd**. Trình duyệt tự mở sau khoảng 2 giây. Nếu trình duyệt đang giữ trang cũ, nhấn Ctrl + F5.
 4. Vào **Thiết lập → Khôi phục từ bản sao**, chọn JSON vừa lưu và xác nhận. Kiểm tra số câu, tên tổ, điểm và phát thử các tệp của bạn.
-5. Xuất thêm một bản sao từ phiên bản 2.2.1 trước sự kiện. Bản sao 2.2.1 chứa cả gợi ý đa phương tiện và lịch sử điểm; không khôi phục nó bằng ứng dụng 1.0/2.0/2.1.
+5. Xuất thêm một bản sao từ phiên bản 2.2.2 trước sự kiện. Bản sao 2.2.2 chứa cả gợi ý đa phương tiện và lịch sử điểm; không khôi phục nó bằng ứng dụng 1.0/2.0/2.1.
 
-Ứng dụng không thể tự lấy câu hỏi đã nhập trên laptop của bạn từ GitHub. Hãy dùng bản sao JSON để chuyển dữ liệu. Gói tải về không chứa dữ liệu sự kiện của bạn và không tự xóa dữ liệu cũ. Nếu dùng trực tiếp thư mục data cũ với máy chủ 2.2.1, ứng dụng tạo bản trạng thái nguyên gốc `data/before-v4-<thời điểm>.json` trước khi chuyển đổi; toàn bộ tệp media giữ nguyên. Cách dùng giao diện sao lưu/khôi phục ở trên vẫn được khuyến nghị cho người tổ chức.
+Ứng dụng không thể tự lấy câu hỏi đã nhập trên laptop của bạn từ GitHub. Hãy dùng bản sao JSON để chuyển dữ liệu. Gói tải về không chứa dữ liệu sự kiện của bạn và không tự xóa dữ liệu cũ. Nếu dùng trực tiếp thư mục data cũ với máy chủ 2.2.2, ứng dụng tạo bản trạng thái nguyên gốc `data/before-v4-<thời điểm>.json` trước khi chuyển đổi; toàn bộ tệp media giữ nguyên. Cách dùng giao diện sao lưu/khôi phục ở trên vẫn được khuyến nghị cho người tổ chức.
 
 ## Cài mới và mở ứng dụng
 
@@ -25,7 +25,7 @@ Nếu Windows hoặc máy công ty chặn tệp tải xuống, kiểm tra nguồ
 
 ## Tên chương trình và theme V4
 
-Tên minigame mặc định là **20/10 Minigame Studio**. Khi nâng cấp hoặc khôi phục bản sao, tên tạm “Vụ Nổ Bé” tự đổi về tên này; tên khác do bạn tự đặt vẫn được giữ. Vào **Thiết lập → Tên minigame → Lưu thiết lập** để đổi tên; Admin, tiêu đề trình duyệt, màn hình TV và khung xem trước cập nhật cùng nhau. Tên này được sao lưu/khôi phục, tách riêng khỏi thông điệp màn hình chào và nội dung câu hỏi. Dữ liệu cũ chưa có tên sẽ dùng mặc định, không ghi đè thông điệp cũ.
+Tên dự án và gói tải là **20/10 Minigame Studio**; tên hiển thị bên trong minigame mặc định là **Vụ Nổ Bé**. Khi nâng cấp hoặc khôi phục dữ liệu bản 2.2.1, tên mặc định “20/10 Minigame Studio” trong ứng dụng được sửa lại thành “Vụ Nổ Bé”; tên tùy chỉnh khác vẫn được giữ. Vào **Thiết lập → Tên minigame → Lưu thiết lập** để đổi tên; Admin, tiêu đề trình duyệt, màn hình TV và khung xem trước cập nhật cùng nhau. Tên này được sao lưu/khôi phục, tách riêng khỏi thông điệp màn hình chào và nội dung câu hỏi. Dữ liệu cũ chưa có tên sẽ dùng mặc định, không ghi đè thông điệp cũ.
 
 **Chuyến Bay Tinh Cầu V4** là chủ đề hình ảnh: thẻ lên tàu, nền sao, hành tinh hoạt hình 3D và vệ tinh nhỏ. Màu tổ cố định: Tổ 1 cyan #79E7F0, Tổ 2 tím #B18CFF, Tổ 3 hồng #FF8DBF, Tổ 4 xanh ngọc #7DE9C7. Siêu khó/vòng tự do dùng hành tinh vàng. Màu nhấn trong Thiết lập áp dụng cho điều khiển, không thay bốn màu tổ.
 
@@ -83,7 +83,7 @@ Trình duyệt có thể chặn tự phát âm thanh cho tới khi bạn bấm B
 
 ## Kiến trúc và kiểm thử (dành cho người phát triển)
 
-Giữ nguyên kiến trúc bản 1.0: Node.js tiêu chuẩn, HTML/CSS/JavaScript thuần, HTTP chỉ lắng nghe loopback `127.0.0.1`, JSON và media cục bộ. Không có phụ thuộc production, CDN, font ngoài hoặc API Internet. Poll trạng thái 500 ms; đồng hồ lấy mốc thời gian máy chủ. Tên minigame là trường settings.programName tùy chọn, mặc định 20/10 Minigame Studio; giữ schema 4. Không nhập câu hỏi hoặc logic mô phỏng từ demo. API TV loại đáp án chưa công bố, lựa chọn riêng của MC và media gợi ý chưa hiện. File API hỗ trợ byte range cho video. Fullscreen dùng requestFullscreen/exitFullscreen/fullscreenchange, không giả bằng CSS.
+Giữ nguyên kiến trúc bản 1.0: Node.js tiêu chuẩn, HTML/CSS/JavaScript thuần, HTTP chỉ lắng nghe loopback `127.0.0.1`, JSON và media cục bộ. Không có phụ thuộc production, CDN, font ngoài hoặc API Internet. Poll trạng thái 500 ms; đồng hồ lấy mốc thời gian máy chủ. Tên minigame là trường settings.programName tùy chọn, mặc định Vụ Nổ Bé; giữ schema 4. Không nhập câu hỏi hoặc logic mô phỏng từ demo. API TV loại đáp án chưa công bố, lựa chọn riêng của MC và media gợi ý chưa hiện. File API hỗ trợ byte range cho video. Fullscreen dùng requestFullscreen/exitFullscreen/fullscreenchange, không giả bằng CSS.
 
 Dữ liệu schema 4; nhận bản sao `studio-2010-v1`, `studio-2010-v2`, `studio-2010-v3` và `studio-2010-v4`. Chuyển đổi cộng thêm trường mới, giữ nội dung và ID cũ. Ghi trạng thái bằng tệp tạm rồi đổi tên; dữ liệu lỗi không bị tự thay bằng dữ liệu mẫu.
 
