@@ -599,8 +599,8 @@ test("V4 planets and four fixed team colors mirror TV/preview without leaking wa
   await page.goto("/");
   const tv = await tvPage(context),
     preview = page.frameLocator("iframe");
-  await expect(page.locator(".brand")).toContainText("Vụ Nổ Bé");
-  await expect(tv.locator(".big-title")).toContainText("Vụ Nổ Bé");
+  await expect(page.locator(".brand")).toContainText("20/10 Minigame Studio");
+  await expect(tv.locator(".big-title")).toContainText("20/10 Minigame Studio");
   const s = await snapshot(request);
   await page.locator("#select-q").selectOption(s.questions[1].id);
   for (const v of [tv, preview]) {
@@ -658,7 +658,7 @@ test("editable minigame name stays separate from welcome message and persists ac
   await page.goto("/");
   const tv = await tvPage(context);
   await click(page, "⚙ Thiết lập");
-  await expect(page.locator("#programName")).toHaveValue("Vụ Nổ Bé");
+  await expect(page.locator("#programName")).toHaveValue("20/10 Minigame Studio");
   await page.locator("#programName").fill("Vũ trụ <của chúng mình>");
   await click(page, "Lưu thiết lập");
   await expect(tv.locator(".big-title")).toContainText(

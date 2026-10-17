@@ -411,7 +411,7 @@ test("program name is optional for existing schema 4 data, validates and survive
   const loaded = migrate(old);
   assert.equal(loaded.version, 4);
   assert.deepEqual(loaded.questions, content);
-  assert.equal(audience(loaded).settings.programName, "Vụ Nổ Bé");
+  assert.equal(audience(loaded).settings.programName, "20/10 Minigame Studio");
   const renamed = act(loaded, {
     type: "settings",
     settings: { ...loaded.settings, programName: "Vũ trụ của chúng mình" },

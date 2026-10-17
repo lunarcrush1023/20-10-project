@@ -48,7 +48,7 @@ export function initial() {
       backupPoints: 1,
       tiePoints: 1,
       accent: "#ebae65",
-      programName: "Vụ Nổ Bé",
+      programName: "20/10 Minigame Studio",
       title: "Tôn vinh những điều rực rỡ",
       prize: "Giải thưởng đặc biệt",
       specialRules: "Người dẫn chương trình công bố thể lệ tại sự kiện.",
@@ -186,6 +186,7 @@ export function migrate(input) {
       feedbackTeam: null,
     });
   }
+  if (s?.settings?.programName === "Vụ Nổ Bé") s.settings.programName = "20/10 Minigame Studio";
   validate(s);
   return s;
 }
@@ -728,7 +729,7 @@ export function audience(s) {
   return {
     teams: s.teams,
     settings: {
-      programName: s.settings.programName ?? "Vụ Nổ Bé",
+      programName: s.settings.programName ?? "20/10 Minigame Studio",
       title: s.settings.title,
       prize: s.settings.prize,
       accent: s.settings.accent,

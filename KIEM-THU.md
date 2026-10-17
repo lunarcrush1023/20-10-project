@@ -1,8 +1,8 @@
-# Kiểm thử Vụ Nổ Bé 2.2.0 · Theme V4
+# Kiểm thử 20/10 Minigame Studio 2.2.1 · Theme V4
 
 Môi trường: Linux, Node.js, Chromium và Playwright. Chưa chạy trực tiếp trên Windows/TV thật.
 
-Kết quả tích hợp ngày 17/10/2026: kiểm tra cú pháp đạt; 23 kiểm thử logic, 3 kiểm thử máy chủ và 12 kịch bản Chromium đều đạt (38 tổng cộng).
+Nền tảng theme 2.2.0, kiểm thử ngày 17/10/2026: kiểm tra cú pháp đạt; 23 kiểm thử logic, 3 kiểm thử máy chủ và 12 kịch bản Chromium đều đạt (38 tổng cộng).
 
 ## Phạm vi kiểm tra
 
@@ -19,7 +19,7 @@ Bổ sung V4: dữ liệu schema 4 thiếu programName vẫn hợp lệ và khô
 
 ## Đóng gói
 
-Gói Windows 2.2.0 chứa KHOI-DONG.cmd, runtime Node.js 24.14.0 Windows x64 và mã/tài nguyên ứng dụng. Kiểm tra SHA-256 runtime với SHASUMS chính thức, tính toàn vẹn ZIP và đối chiếu mã trong ZIP với nguồn. Không đưa dữ liệu sự kiện hoặc dữ liệu test vào gói. Giữ nguyên các gói cũ.
+Gói Windows 2.2.1 chứa KHOI-DONG.cmd, runtime Node.js 24.14.0 Windows x64 và mã/tài nguyên ứng dụng. Kiểm tra SHA-256 runtime với SHASUMS chính thức, tính toàn vẹn ZIP và đối chiếu mã trong ZIP với nguồn. Không đưa dữ liệu sự kiện hoặc dữ liệu test vào gói. Giữ nguyên các gói cũ.
 
 ## Giới hạn kiểm thử và vận hành
 
@@ -31,3 +31,5 @@ Gói Windows 2.2.0 chứa KHOI-DONG.cmd, runtime Node.js 24.14.0 Windows x64 và
 - Hoàn tác tối đa 40 thao tác trong phiên máy chủ, không giữ sau khi máy chủ đóng hoặc khôi phục. Lịch sử điểm được giữ lâu dài. Tệp đã gỡ khỏi câu giữ trên đĩa để hoàn tác.
 - Chỉ một MC trên laptop tin cậy; không có đăng nhập ứng dụng, không cho người chơi kết nối điện thoại/LAN. Máy chủ chỉ lắng nghe 127.0.0.1.
 - Gói chưa ký số; không tự cập nhật, không gửi dữ liệu ra Internet và không dùng dịch vụ trả phí.
+
+Bản 2.2.1 chỉ đổi tên mặc định về 20/10 Minigame Studio. Đã chạy lại kiểm tra cú pháp, 23 kiểm thử logic, 3 kiểm thử máy chủ và kiểm thử trình duyệt đổi tên/sao lưu/khôi phục. Kiểm tra chuyển tên tạm Vụ Nổ Bé giữ nguyên câu hỏi, tiến trình và tên tùy chỉnh khác.

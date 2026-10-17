@@ -304,6 +304,6 @@ server.on("error", (e) => {
 });
 server.listen(port, "127.0.0.1", () =>
   console.log(
-    `Vụ Nổ Bé · Minigame: http://127.0.0.1:${port}\nGiu cua so nay mo trong su kien.`,
+    `20/10 Minigame Studio · Minigame: http://127.0.0.1:${port}\nGiu cua so nay mo trong su kien.`,
   ),
 );

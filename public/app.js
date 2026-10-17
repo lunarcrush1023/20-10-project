@@ -106,7 +106,7 @@ function mediaHTML(q, area = "question") {
 }
 const teamColors = ["#79E7F0", "#B18CFF", "#FF8DBF", "#7DE9C7"];
 const worlds = ["LAM NGỌC", "TỬ TINH", "HỒNG VÂN", "LỤC HẢI", "THÁI DƯƠNG"];
-const programName = () => state.settings.programName ?? "Vụ Nổ Bé";
+const programName = () => state.settings.programName ?? "20/10 Minigame Studio";
 function flightLook(q, l) {
   const variant = q?.category === "special" || l.freeForAll ? 4 : (l.team ?? 0);
   return {
@@ -223,7 +223,7 @@ function render() {
     )
     .join(
       "",
-    )}<div class="bottom"><span class="dot"></span>Chạy cục bộ · Ngoại tuyến<br>Dữ liệu tự động lưu trên máy<br><span class="muted">Phiên bản 2.2.0 • Dành cho 20/10</span></div></aside><main class="main"><header class="top"><div><p class="eyebrow">Không gian tổ chức</p><h1>${titles[tab][0]}</h1><p class="muted">${titles[tab][1]}</p></div><div class="row">${button("HOÀN TÁC", "undo", "", state.undoCount ? "" : "disabled")}<a class="button" href="/audience" target="audience">↗ Mở màn hình TV</a></div></header>${draft ? editor() : { live: livePage, questions: questionsPage, settings: settingsPage, help: helpPage }[tab]()}</main></div>`;
+    )}<div class="bottom"><span class="dot"></span>Chạy cục bộ · Ngoại tuyến<br>Dữ liệu tự động lưu trên máy<br><span class="muted">Phiên bản 2.2.1 • Dành cho 20/10</span></div></aside><main class="main"><header class="top"><div><p class="eyebrow">Không gian tổ chức</p><h1>${titles[tab][0]}</h1><p class="muted">${titles[tab][1]}</p></div><div class="row">${button("HOÀN TÁC", "undo", "", state.undoCount ? "" : "disabled")}<a class="button" href="/audience" target="audience">↗ Mở màn hình TV</a></div></header>${draft ? editor() : { live: livePage, questions: questionsPage, settings: settingsPage, help: helpPage }[tab]()}</main></div>`;
   if (preserveLiveInput) {
     const input = $("#" + preserveLiveInput.id);
     if (input) {
@@ -732,7 +732,7 @@ app.addEventListener("click", async (e) => {
           warningSound: $("#warningSound").checked,
           backupPoints: 1,
           tiePoints: 1,
-          programName: $("#programName").value.trim() || "Vụ Nổ Bé",
+          programName: $("#programName").value.trim() || "20/10 Minigame Studio",
           title: $("#eventTitle").value,
           prize: $("#prize").value,
           accent: $("#accent").value,
