@@ -1,18 +1,18 @@
-# 20/10 Minigame Studio 2.2.2 · Chuyến Bay Tinh Cầu V4
+# 20/10 Minigame Studio 2.3.0 · Aurora Neon
 
 Ứng dụng dẫn minigame ngoại tuyến: Admin trên laptop, trình chiếu riêng trên TV. Giao diện hoàn toàn bằng tiếng Việt, không tài khoản ứng dụng, không dịch vụ trả phí, không cần Internet khi tổ chức.
 
-**[Tải bản Windows 2.2.2](https://github.com/lunarcrush1023/20-10-project/blob/main/releases/20-10-Minigame-Studio-2.2.2-Windows.zip?raw=true)** — khoảng 33 MB, có sẵn bộ chạy. Nếu thấy trang tệp ZIP, bấm **Download raw file**.
+**[Tải bản Windows 2.3.0](https://github.com/lunarcrush1023/20-10-project/blob/main/releases/20-10-Minigame-Studio-2.3.0-Windows.zip?raw=true)** — khoảng 33 MB, có sẵn bộ chạy. Nếu thấy trang tệp ZIP, bấm **Download raw file**.
 
 ## Nếu bạn đang dùng bản 1.0, 2.0, 2.1 hoặc 2.1.1 — giữ nguyên dữ liệu cũ
 
 1. Mở ứng dụng **bản cũ**, vào **Thiết lập → Sao lưu toàn bộ**, lưu tệp JSON ở nơi dễ tìm. Bản sao này chứa câu hỏi, tệp đính kèm, điểm và tiến trình.
-2. Đóng cửa sổ khởi động bản cũ. Tải ZIP 2.2.2 và **giải nén vào thư mục mới**, không xóa thư mục cũ, không mở hai phiên bản cùng lúc.
+2. Đóng cửa sổ khởi động bản cũ. Tải ZIP 2.3.0 và **giải nén vào thư mục mới**, không xóa thư mục cũ, không mở hai phiên bản cùng lúc.
 3. Trong thư mục mới, nhấp đúp **KHOI-DONG.cmd**. Trình duyệt tự mở sau khoảng 2 giây. Nếu trình duyệt đang giữ trang cũ, nhấn Ctrl + F5.
 4. Vào **Thiết lập → Khôi phục từ bản sao**, chọn JSON vừa lưu và xác nhận. Kiểm tra số câu, tên tổ, điểm và phát thử các tệp của bạn.
-5. Xuất thêm một bản sao từ phiên bản 2.2.2 trước sự kiện. Bản sao 2.2.2 chứa cả gợi ý đa phương tiện và lịch sử điểm; không khôi phục nó bằng ứng dụng 1.0/2.0/2.1.
+5. Xuất thêm một bản sao từ phiên bản 2.3.0 trước sự kiện. Bản sao 2.3.0 chứa cả gợi ý đa phương tiện và lịch sử điểm; không khôi phục nó bằng ứng dụng 1.0/2.0/2.1.
 
-Ứng dụng không thể tự lấy câu hỏi đã nhập trên laptop của bạn từ GitHub. Hãy dùng bản sao JSON để chuyển dữ liệu. Gói tải về không chứa dữ liệu sự kiện của bạn và không tự xóa dữ liệu cũ. Nếu dùng trực tiếp thư mục data cũ với máy chủ 2.2.2, ứng dụng tạo bản trạng thái nguyên gốc `data/before-v4-<thời điểm>.json` trước khi chuyển đổi; toàn bộ tệp media giữ nguyên. Cách dùng giao diện sao lưu/khôi phục ở trên vẫn được khuyến nghị cho người tổ chức.
+Ứng dụng không thể tự lấy câu hỏi đã nhập trên laptop của bạn từ GitHub. Hãy dùng bản sao JSON để chuyển dữ liệu. Gói tải về không chứa dữ liệu sự kiện của bạn và không tự xóa dữ liệu cũ. Nếu dùng trực tiếp thư mục data cũ với máy chủ 2.3.0, ứng dụng tạo bản trạng thái nguyên gốc `data/before-v4-<thời điểm>.json` trước khi chuyển đổi; toàn bộ tệp media giữ nguyên. Cách dùng giao diện sao lưu/khôi phục ở trên vẫn được khuyến nghị cho người tổ chức.
 
 ## Cài mới và mở ứng dụng
 
@@ -23,11 +23,11 @@
 
 Nếu Windows hoặc máy công ty chặn tệp tải xuống, kiểm tra nguồn tải và chính sách máy; không tắt cơ chế bảo vệ. Gói chưa ký số. Nếu báo cổng đang dùng, đóng cửa sổ khởi động phiên bản cũ trước.
 
-## Tên chương trình và theme V4
+## Tên chương trình và giao diện chính thức
 
 Tên dự án và gói tải là **20/10 Minigame Studio**; tên hiển thị bên trong minigame mặc định là **Vụ Nổ Bé**. Khi nâng cấp hoặc khôi phục dữ liệu bản 2.2.1, tên mặc định “20/10 Minigame Studio” trong ứng dụng được sửa lại thành “Vụ Nổ Bé”; tên tùy chỉnh khác vẫn được giữ. Vào **Thiết lập → Tên minigame → Lưu thiết lập** để đổi tên; Admin, tiêu đề trình duyệt, màn hình TV và khung xem trước cập nhật cùng nhau. Tên này được sao lưu/khôi phục, tách riêng khỏi thông điệp màn hình chào và nội dung câu hỏi. Dữ liệu cũ chưa có tên sẽ dùng mặc định, không ghi đè thông điệp cũ.
 
-**Chuyến Bay Tinh Cầu V4** là chủ đề hình ảnh: thẻ lên tàu, nền sao, hành tinh hoạt hình 3D và vệ tinh nhỏ. Màu tổ cố định: Tổ 1 cyan #79E7F0, Tổ 2 tím #B18CFF, Tổ 3 hồng #FF8DBF, Tổ 4 xanh ngọc #7DE9C7. Siêu khó/vòng tự do dùng hành tinh vàng. Màu nhấn trong Thiết lập áp dụng cho điều khiển, không thay bốn màu tổ.
+**Chuyến Bay Tinh Cầu** là concept hình ảnh; **Aurora Neon (phương án B)** là giao diện chính thức duy nhất: thẻ kính tối tím–xanh, ánh aurora mềm, viền neon dịu và đáp án đồng bộ. Giữ hành tinh hoạt hình 3D V4, nền sao, vệ tinh nhỏ và animation hiện có. Màn chờ, câu hỏi, gợi ý, công bố đáp án, đồng hồ, bảng điểm và vòng đặc biệt cùng dùng bảng màu tối; không còn thẻ trắng/xám sáng. Màu tổ cố định: Tổ 1 cyan #79E7F0, Tổ 2 tím #B18CFF, Tổ 3 hồng #FF8DBF, Tổ 4 xanh ngọc #7DE9C7. Siêu khó/vòng tự do dùng hành tinh vàng. Màu nhấn trong Thiết lập áp dụng cho điều khiển, không thay bốn màu tổ.
 
 Khung ĐANG TRÊN TV dùng cùng trang TV và dữ liệu công khai. Màn chờ giữ kín câu hỏi, phương án và đáp án; hình thẻ và hành tinh chỉ là trang trí. Video đặc biệt vẫn phát sạch toàn màn hình. Hoạt ảnh giảm/tắt theo thiết lập giảm chuyển động của hệ thống. Toàn bộ đồ họa/font hệ thống chạy ngoại tuyến.
 

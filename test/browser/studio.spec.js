@@ -730,3 +730,71 @@ test("V4 ticket keeps long options, hint, media and explanation within its bound
   ).toBe("none");
   await tv.screenshot({ path: "work/theme-long-content.png" });
 });
+
+test("official Aurora Neon stays dark in every TV state and matches preview without changing planet artwork", async ({
+  page,
+  context,
+  request,
+}) => {
+  await page.goto("/");
+  const tv = await tvPage(context),
+    preview = page.frameLocator("iframe");
+  const check = async () => {
+    for (const v of [tv, preview]) {
+      await expect(v.locator(".ticket")).toBeVisible();
+      const style = await v.locator(".ticket").evaluate((e) => {
+        const s = getComputedStyle(e);
+        return {
+          bg: s.backgroundImage,
+          cut: s.clipPath,
+          radius: parseFloat(s.borderRadius),
+        };
+      });
+      expect(style.bg).toContain("37, 43, 88");
+      expect(style.bg).toContain("9, 46, 73");
+      expect(style.cut).toBe("none");
+      expect(style.radius).toBeGreaterThan(0);
+      expect(
+        await v
+          .locator(".preview")
+          .evaluate((e) => getComputedStyle(e).backgroundImage),
+      ).toBe("none");
+      await expect(v.locator(".planet-system svg")).toHaveCount(1);
+    }
+  };
+  await check();
+  const s = await snapshot(request);
+  await page.locator("#select-q").selectOption(s.questions[0].id);
+  await expect(tv.getByRole("heading", { name: "Chuẩn bị..." })).toBeVisible();
+  await check();
+  await click(page, "HIỆN CÂU HỎI");
+  await expect(tv.locator(".question-title")).toBeVisible();
+  await check();
+  await expect(tv.locator(".option.correct")).toHaveCount(0);
+  await tv.emulateMedia({ reducedMotion: "reduce" });
+  await tv.screenshot({ path: "work/aurora-question.png" });
+  await click(page, "HIỆN GỢI Ý");
+  await expect(tv.locator(".hint-block")).toBeVisible();
+  await check();
+  await option(page, 0).click();
+  await expect(tv.locator(".option.correct")).toHaveCount(1);
+  await check();
+  await tv.screenshot({ path: "work/aurora-reveal.png" });
+  await click(page, "Bảng điểm");
+  await expect(tv.getByRole("heading", { name: "Bảng điểm" })).toBeVisible();
+  await check();
+  await tv.screenshot({ path: "work/aurora-score.png" });
+  await page.locator("#select-q").selectOption(s.questions[17].id);
+  await click(page, "HIỆN CÂU HỎI");
+  await expect(tv.locator(".individual-label")).toBeVisible();
+  await expect(tv.locator(".question-title")).toHaveText(s.questions[17].title);
+  await check();
+  await tv.screenshot({ path: "work/aurora-special.png" });
+  await page.locator("#select-q").selectOption(s.questions[1].id);
+  await click(page, "HIỆN CÂU HỎI");
+  for (let i = 0; i < 4; i++) await click(page, "CHỊU THUA / CHUYỂN TỔ");
+  await expect(tv.locator(".active-badge")).toContainText("Tự do");
+  await check();
+  await expect(tv.locator(".option.correct")).toHaveCount(0);
+  await tv.screenshot({ path: "work/aurora-free.png" });
+});

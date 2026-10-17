@@ -4,7 +4,7 @@ cd /d "%~dp0"
 title 20/10 Minigame Studio
 if not exist "runtime\node.exe" (
   echo Khong tim thay bo chay. Hay giai nen day du goi Windows.
-  echo Vui long tai goi Windows 2.2.2 day du theo huong dan README.md.
+  echo Vui long tai goi Windows 2.3.0 day du theo huong dan README.md.
   pause
   exit /b 1
 )
