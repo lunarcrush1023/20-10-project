@@ -48,6 +48,7 @@ export function initial() {
       backupPoints: 1,
       tiePoints: 1,
       accent: "#ebae65",
+      programName: "Vụ Nổ Bé",
       title: "Tôn vinh những điều rực rỡ",
       prize: "Giải thưởng đặc biệt",
       specialRules: "Người dẫn chương trình công bố thể lệ tại sự kiện.",
@@ -638,6 +639,8 @@ export function validate(s) {
       (n) => Number.isInteger(n) && n >= 0 && n <= 100,
     ) ||
     !/^#[0-9a-f]{6}$/i.test(c.accent) ||
+    (c.programName !== undefined &&
+      (!str(c.programName, 100) || !c.programName.trim())) ||
     ![c.title, c.prize, c.specialRules].every((x) => str(x, 2000)) ||
     typeof c.timerEnabled !== "boolean" ||
     typeof c.warningSound !== "boolean" ||
@@ -725,6 +728,7 @@ export function audience(s) {
   return {
     teams: s.teams,
     settings: {
+      programName: s.settings.programName ?? "Vụ Nổ Bé",
       title: s.settings.title,
       prize: s.settings.prize,
       accent: s.settings.accent,

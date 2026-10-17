@@ -242,6 +242,8 @@ const server = http.createServer(async (req, res) => {
         "/audience": "index.html",
         "/app.js": "app.js",
         "/style.css": "style.css",
+        "/theme.css": "theme.css",
+        "/planet.js": "planet.js",
       };
       if (!allowed[url.pathname])
         return json(res, { error: "Không tìm thấy." }, 404);
@@ -302,6 +304,6 @@ server.on("error", (e) => {
 });
 server.listen(port, "127.0.0.1", () =>
   console.log(
-    `20/10 Minigame Studio: http://127.0.0.1:${port}\nGiu cua so nay mo trong su kien.`,
+    `Vụ Nổ Bé · Minigame: http://127.0.0.1:${port}\nGiu cua so nay mo trong su kien.`,
   ),
 );

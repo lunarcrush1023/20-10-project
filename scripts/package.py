@@ -7,8 +7,8 @@ out.mkdir(parents=True, exist_ok=True)
 expected = next(line.split()[0] for line in (root/'work/SHASUMS256.txt').read_text().splitlines() if line.split()[-1] == 'win-x64/node.exe')
 assert hashlib.sha256((root/'work/node.exe').read_bytes()).hexdigest() == expected, 'Node checksum mismatch'
 version=json.loads((root/'package.json').read_text())['version']
-name = f'20-10-Minigame-Studio-{version}-Windows.zip'
-prefix=f'20-10-Minigame-Studio-{version}/'
+name = f'Vu-No-Be-{version}-Windows.zip'
+prefix=f'Vu-No-Be-{version}/'
 with zipfile.ZipFile(out/name,'w',zipfile.ZIP_DEFLATED) as z:
     for f in ['KHOI-DONG.cmd','README.md','KIEM-THU.md','server.mjs','game.mjs','package.json']:
         z.write(root/f,prefix+f)

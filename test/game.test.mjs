@@ -402,3 +402,30 @@ test("closing video never grades or counts down; pause/restart/audio control val
   assert.equal(audience(s).live.videoMuted, true);
   assert.throws(() => act(s, { type: "videoAudio", volume: 2 }));
 });
+
+test("program name is optional for existing schema 4 data, validates and survives backup-shaped state", () => {
+  let old = initial();
+  delete old.settings.programName;
+  const content = structuredClone(old.questions);
+  validate(old);
+  const loaded = migrate(old);
+  assert.equal(loaded.version, 4);
+  assert.deepEqual(loaded.questions, content);
+  assert.equal(audience(loaded).settings.programName, "Vụ Nổ Bé");
+  const renamed = act(loaded, {
+    type: "settings",
+    settings: { ...loaded.settings, programName: "Vũ trụ của chúng mình" },
+  });
+  assert.equal(audience(renamed).settings.programName, "Vũ trụ của chúng mình");
+  assert.deepEqual(
+    migrate(JSON.parse(JSON.stringify(renamed))).questions,
+    content,
+  );
+  for (const programName of ["", 42, "x".repeat(101)])
+    assert.throws(() =>
+      act(old, {
+        type: "settings",
+        settings: { ...old.settings, programName },
+      }),
+    );
+});

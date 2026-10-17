@@ -1,12 +1,12 @@
 {
   "name": "20-10-minigame-studio",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
     "test": "node test/game.test.mjs && node test/persistence.test.mjs",
-    "check": "node --check server.mjs && node --check game.mjs && node --check public/app.js",
+    "check": "node --check server.mjs && node --check game.mjs && node --check public/app.js && node --check public/planet.js",
     "test:browser": "playwright test"
   },
   "engines": {

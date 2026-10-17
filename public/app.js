@@ -1,3 +1,4 @@
+import { planetMarkup } from "/planet.js";
 const $ = (s) => document.querySelector(s),
   app = $("#app"),
   tv = location.pathname === "/audience",
@@ -103,6 +104,71 @@ function qCurrent() {
 function mediaHTML(q, area = "question") {
   return `<div class="media" data-media-area="${area}">${(q?.media || []).map((m) => (m.kind === "image" ? `<img src="/media/${m.file}" alt="${esc(m.name)}">` : `<${m.kind} data-area="${area}" src="/media/${m.file}" ${tv ? "" : "controls"} preload="metadata" ${m.kind === "video" ? "playsinline" : ""} aria-label="${esc(m.name)}"></${m.kind}>`)).join("")}</div>`;
 }
+const teamColors = ["#79E7F0", "#B18CFF", "#FF8DBF", "#7DE9C7"];
+const worlds = ["LAM NGỌC", "TỬ TINH", "HỒNG VÂN", "LỤC HẢI", "THÁI DƯƠNG"];
+const programName = () => state.settings.programName ?? "Vụ Nổ Bé";
+function flightLook(q, l) {
+  const variant = q?.category === "special" || l.freeForAll ? 4 : (l.team ?? 0);
+  return {
+    variant,
+    color: variant === 4 ? "#FFD98F" : teamColors[variant],
+    glow: ["#205b75", "#4a2c81", "#692e59", "#235d64", "#674963"][variant],
+  };
+}
+function flightScene(q, l, content) {
+  const look = flightLook(q, l),
+    waiting = l.mode === "waiting",
+    question = l.mode === "question";
+  const who =
+    q?.category === "special"
+      ? "Nhiệm vụ cá nhân"
+      : l.freeForAll
+        ? "⚡ Tự do giành quyền trả lời!"
+        : l.team == null
+          ? "Chờ tổ giành quyền trả lời"
+          : state.teams[l.team].name;
+  const number =
+    q?.number ?? (state.questions?.findIndex((x) => x.id === q?.id) + 1 || "");
+  const rich =
+    question &&
+    (q?.media?.length ||
+      q?.hint !== undefined ||
+      l.reveal ||
+      (q?.options?.length ?? 0) > 4);
+  return `<div class="scene ${waiting ? "mode-waiting" : ""} ${look.variant === 4 ? "mode-special" : ""} ${rich ? "rich-content" : ""}" style="--active:${look.color};--glow:${look.glow}">
+  <div class="stars" aria-hidden="true"></div><div class="stars-two" aria-hidden="true"></div><div class="glow-orb" aria-hidden="true"></div><div class="flight-path" aria-hidden="true"></div>
+  <div class="planet-system" aria-hidden="true">${planetMarkup(look.variant)}</div><div class="planet-caption">✦ TINH CẦU ${worlds[look.variant]}</div>
+  <div class="meta-top">✦ CHUYẾN BAY TINH CẦU · 20/10</div><div class="big-title ${programName().length > 28 ? "long-name" : ""}">${esc(programName())}<span> ✦</span></div>
+  <div class="motto">MỖI NGƯỜI MỘT VŨ TRỤ · MỖI LƯỢT MỘT ĐIỀU KỲ DIỆU</div>
+  <section class="ticket ${waiting ? "waiting-flight" : ""}"><div class="ticket-content"><div class="ticket-inner">
+  <div class="ticket-head"><span>THẺ LÊN TÀU · 20/10</span><span>${question || waiting ? `CÂU ${String(number).padStart(2, "0")} · ${esc(cats[q?.category])}` : "TRẠM BAY TỎA SÁNG"}</span></div>
+  ${question || waiting ? `<div class="active-badge"><span class="team-dot"></span>${esc(who)}</div>` : ""}
+  <div class="preview ${q?.category === "special" ? "special" : ""}">${content}</div></div></div>
+  <aside class="stub"><span>CỬA<br>TINH CẦU</span><strong>${q?.category === "special" ? "★" : l.team == null ? "✦" : l.team + 1}</strong><span>SẴN SÀNG<br>TỎA SÁNG</span><span class="barcode" aria-hidden="true"></span></aside></section></div>`;
+}
+function fitFlightTicket() {
+  const outer = $(".ticket-content"),
+    inner = $(".ticket-inner");
+  if (!outer || !inner) return;
+  inner.style.transform = "";
+  inner.style.width = "";
+  const available =
+    outer.clientHeight -
+    parseFloat(getComputedStyle(outer).paddingTop) -
+    parseFloat(getComputedStyle(outer).paddingBottom);
+  if (inner.scrollHeight > available && available > 0) {
+    // Find the largest readable scale after line wrapping changes with width.
+    let low = Math.min(1, available / inner.scrollHeight), high = 1;
+    for (let i = 0; i < 9; i++) {
+      const candidate = (low + high) / 2;
+      inner.style.width = `${100 / candidate}%`;
+      if (inner.scrollHeight * candidate <= available) low = candidate;
+      else high = candidate;
+    }
+    inner.style.transform = `scale(${low})`;
+    inner.style.width = `${100 / low}%`;
+  }
+}
 function stage(q, l = state.live) {
   const settings = state.settings;
   if (l.mode === "video")
@@ -118,7 +184,7 @@ function stage(q, l = state.live) {
     content = `<div class="flourish">✳</div><p class="eyebrow">Chào mừng ngày Phụ nữ Việt Nam</p><h1>${esc(settings.title)}</h1><p class="subtitle">20 / 10 &nbsp; • &nbsp; Cùng chơi, cùng tỏa sáng</p>`;
   else
     content = `<p class="eyebrow">${q.category === "special" ? "✦ " + esc(settings.prize) : esc(cats[q.category])} ${l.freeForAll ? " • ⚡ Tự do giành quyền trả lời!" : ""}</p><h2 class="question-title">${esc(q.title)}</h2>${mediaHTML(q)}${q.type === "choice" ? `<div class="options">${q.options.map((o, i) => `<div class="option ${l.reveal && q.correct === i ? "correct" : ""}"><b>${String.fromCharCode(65 + i)}</b>${esc(o)}</div>`).join("")}</div>` : ""}${q.hint !== undefined ? `<section class="hint-block"><p class="hint">✧ ${esc(q.hint)}</p>${mediaHTML({ media: q.hintMedia }, "hint")}</section>` : ""}${l.reveal && q.answer !== undefined ? `<p class="hint">Đáp án: ${esc(q.type === "open" ? q.answer : q.options[q.correct])}</p><p class="subtitle">${esc(q.explanation)}</p>` : ""}${l.feedback ? `<div class="feedback ${l.feedback === "incorrect" ? "bad" : ""}">${{ correct: "✓ Chính xác! Xin chúc mừng", incorrect: l.settled ? "Sai rồi!" : "Chưa chính xác!", revealed: "Đã công bố đáp án", giveup: "Đã chuyển cơ hội trả lời", skipped: "Đã bỏ qua câu hỏi" }[l.feedback]}</div>` : ""}${q.category === "special" ? `<p class="subtitle">${esc(settings.specialRules)}</p>` : ""}`;
-  return `<div class="preview ${q?.category === "special" && l.mode !== "welcome" ? "special" : ""}">${content}</div>`;
+  return flightScene(q, l, content);
 }
 function render() {
   const focusedId = document.activeElement?.id;
@@ -127,6 +193,7 @@ function render() {
       ? { id: focusedId, value: document.activeElement.value }
       : null;
   document.documentElement.style.setProperty("--accent", state.settings.accent);
+  document.title = `${programName()} · ${tv ? "Màn hình TV" : "Điều khiển"}`;
   if (tv) {
     renderTV();
     return;
@@ -143,7 +210,7 @@ function render() {
     ],
     help: ["Sẵn sàng lên sóng", "Hướng dẫn nhanh cho người dẫn chương trình."],
   };
-  app.innerHTML = `<div class="shell"><aside class="sidebar"><div class="brand"><span>20/10</span><br>Minigame Studio</div>${Object.entries(
+  app.innerHTML = `<div class="shell"><aside class="sidebar"><div class="brand"><span>✧ ${esc(programName())}</span><small>CHUYẾN BAY TINH CẦU · 20/10</small></div>${Object.entries(
     {
       questions: "01 · Quản lý câu hỏi",
       live: "02 · Điều khiển trực tiếp",
@@ -156,7 +223,7 @@ function render() {
     )
     .join(
       "",
-    )}<div class="bottom"><span class="dot"></span>Chạy cục bộ · Ngoại tuyến<br>Dữ liệu tự động lưu trên máy<br><span class="muted">Phiên bản 2.1.1 • Dành cho 20/10</span></div></aside><main class="main"><header class="top"><div><p class="eyebrow">Không gian tổ chức</p><h1>${titles[tab][0]}</h1><p class="muted">${titles[tab][1]}</p></div><div class="row">${button("HOÀN TÁC", "undo", "", state.undoCount ? "" : "disabled")}<a class="button" href="/audience" target="audience">↗ Mở màn hình TV</a></div></header>${draft ? editor() : { live: livePage, questions: questionsPage, settings: settingsPage, help: helpPage }[tab]()}</main></div>`;
+    )}<div class="bottom"><span class="dot"></span>Chạy cục bộ · Ngoại tuyến<br>Dữ liệu tự động lưu trên máy<br><span class="muted">Phiên bản 2.2.0 • Dành cho 20/10</span></div></aside><main class="main"><header class="top"><div><p class="eyebrow">Không gian tổ chức</p><h1>${titles[tab][0]}</h1><p class="muted">${titles[tab][1]}</p></div><div class="row">${button("HOÀN TÁC", "undo", "", state.undoCount ? "" : "disabled")}<a class="button" href="/audience" target="audience">↗ Mở màn hình TV</a></div></header>${draft ? editor() : { live: livePage, questions: questionsPage, settings: settingsPage, help: helpPage }[tab]()}</main></div>`;
   if (preserveLiveInput) {
     const input = $("#" + preserveLiveInput.id);
     if (input) {
@@ -179,7 +246,7 @@ function renderTV() {
         wasPlaying: !el.paused,
       }),
   );
-  app.innerHTML = `<main class="audience ${l.mode === "video" ? "video-mode" : ""}"><div class="audience-tools" ${previewOnly ? "hidden" : ""}>${button(document.fullscreenElement ? "Thoát toàn màn hình" : "Toàn màn hình", "fullscreen", "", `aria-pressed="${Boolean(document.fullscreenElement)}"`)}${button("Bật âm thanh", "sound")}</div>${l.mode === "video" ? stage(q) : `<div class="stage"><div class="stage-timer" data-clock></div>${stage(q)}<div class="score-strip">${state.teams.map((t, i) => `<div class="${q?.category !== "special" && l.team === i ? "current" : ""}"><span>${q?.category !== "special" && l.team === i ? "● " : ""}${esc(t.name)}</span><b>${t.score}</b></div>`).join("")}</div>${q?.category === "special" ? '<div class="individual-label">Vòng cá nhân · Không cộng điểm tổ</div>' : ""}</div>`}</main>`;
+  app.innerHTML = `<main class="audience ${l.mode === "video" ? "video-mode" : ""}"><div class="audience-tools" ${previewOnly ? "hidden" : ""}>${button(document.fullscreenElement ? "Thoát toàn màn hình" : "Toàn màn hình", "fullscreen", "", `aria-pressed="${Boolean(document.fullscreenElement)}"`)}${button("Bật âm thanh", "sound")}</div>${l.mode === "video" ? stage(q) : `<div class="stage flight-theme" style="--active:${flightLook(q, l).color};--glow:${flightLook(q, l).glow}"><div class="stage-timer" data-clock></div>${stage(q)}<div class="score-strip">${state.teams.map((t, i) => `<div style="--team-color:${teamColors[i]}" class="${q?.category !== "special" && l.team === i ? "current" : ""}"><span>${q?.category !== "special" && l.team === i ? "● " : ""}${esc(t.name)}</span><b>${t.score}</b></div>`).join("")}</div>${q?.category === "special" ? '<div class="individual-label">Vòng cá nhân · Không cộng điểm tổ</div>' : ""}</div>`}</main>`;
   document.querySelectorAll("video,audio").forEach((el) => {
     const area = el.dataset.area,
       old = mediaKey === newKey ? saved[area + el.getAttribute("src")] : null;
@@ -221,6 +288,19 @@ function renderTV() {
       else el.pause();
     }
   });
+  const transitionKey = `${q?.id}:${l.mode}`;
+  if (transitionKey !== mediaKey && l.mode !== "video") {
+    $(".ticket")?.classList.add("reveal-flight");
+    $(".planet-system")?.classList.add("scene-enter");
+  }
+  fitFlightTicket();
+  document.querySelectorAll(".ticket img, .ticket video").forEach((el) => {
+    el.addEventListener(
+      el.tagName === "IMG" ? "load" : "loadedmetadata",
+      fitFlightTicket,
+      { once: true },
+    );
+  });
   mediaKey = newKey;
   lastMediaEpoch = l.mediaEpoch;
   lastHintEpoch = l.hintEpoch;
@@ -260,7 +340,7 @@ function livePage() {
     selected = q?.id;
   if (q?.category === "video") return videoLivePage(q, index);
   return `<div class="question-picker"><select id="select-q" aria-label="Chọn câu hỏi">${state.questions.map((q, i) => `<option value="${q.id}" ${q.id === selected ? "selected" : ""}>${i + 1}. [${cats[q.category]}] ${esc(q.title)}</option>`).join("")}</select>${button("HIỆN CÂU HỎI", "show", "primary", !q ? "disabled" : "")}${button("CÂU TRƯỚC", "previous", "", index <= 0 ? "disabled" : "")}${button("CÂU TIẾP THEO", "next", "", index >= state.questions.length - 1 ? "disabled" : "")}</div>
- <div class="team-selectors compact-teams">${state.teams.map((t, i) => `<div class="team-box ${l.team === i && !special ? "active" : ""}">${button(`<b>Tổ ${i + 1}</b><small>${t.name === `Tổ ${i + 1}` ? "" : esc(t.name)}</small>`, "team", "team-choose", `data-index="${i}" ${special ? "disabled" : ""}`)}<div class="score-adjust">${button("−", "adjustScore", "", `data-index="${i}" data-delta="-1" aria-label="Trừ điểm Tổ ${i + 1}"`)}<strong>${t.score} điểm</strong>${button("+", "adjustScore", "", `data-index="${i}" data-delta="1" aria-label="Cộng điểm Tổ ${i + 1}"`)}</div></div>`).join("")}</div>
+ <div class="team-selectors compact-teams">${state.teams.map((t, i) => `<div style="--team-color:${teamColors[i]}" class="team-box ${l.team === i && !special ? "active" : ""}">${button(`<b>Tổ ${i + 1}</b><small>${t.name === `Tổ ${i + 1}` ? "" : esc(t.name)}</small>`, "team", "team-choose", `data-index="${i}" ${special ? "disabled" : ""}`)}<div class="score-adjust">${button("−", "adjustScore", "", `data-index="${i}" data-delta="-1" aria-label="Trừ điểm Tổ ${i + 1}"`)}<strong>${t.score} điểm</strong>${button("+", "adjustScore", "", `data-index="${i}" data-delta="1" aria-label="Cộng điểm Tổ ${i + 1}"`)}</div></div>`).join("")}</div>
  <div class="live-status" role="status"><span class="dot"></span>${liveStatus()}<span class="badge">${special ? "Cá nhân" : l.team === null ? "Chưa chọn tổ" : esc(state.teams[l.team].name)}</span></div>
  <div class="operator-layout"><section class="panel answer-console"><p class="eyebrow">Riêng Admin · Câu ${index + 1}</p><h2 class="live-question">${esc(q?.title || "Chưa có câu hỏi")}</h2>
  ${q?.type === "choice" ? `<p class="muted small-note">Bấm phương án để chấm ngay.</p><div class="answer-buttons">${q.options.map((o, i) => button(`<b>${String.fromCharCode(65 + i)}</b> ${esc(o)}${i === q.correct ? '<small class="correct-badge">✓ Đáp án đúng</small>' : ""}`, "chooseOption", `answer-button ${i === q.correct ? "stored-correct" : ""} ${l.selectedOption === i ? "selected" : ""}`, `data-index="${i}" ${!active ? "disabled" : ""}`)).join("")}</div>` : `<div class="reference-answer"><b>Đáp án tham khảo</b><p>${esc(q?.answer)}</p></div><div class="judge-buttons">${button(special ? "ĐÚNG / CHỐT ĐÁP ÁN" : "ĐÚNG (+1)", "correct", "correct-button", !active ? "disabled" : "")}${button("SAI (0 ĐIỂM)", "incorrect", "bad", !active ? "disabled" : "")}</div>`}
@@ -332,7 +412,10 @@ function mountTVPreview() {
   }
   placeTVPreview();
 }
-addEventListener("resize", placeTVPreview);
+addEventListener("resize", () => {
+  placeTVPreview();
+  fitFlightTicket();
+});
 addEventListener("scroll", placeTVPreview);
 function questionsPage() {
   return `<div class="row spread toolbar"><span class="muted">${Object.keys(
@@ -382,10 +465,10 @@ function capture() {
 }
 function settingsPage() {
   const s = state.settings;
-  return `<div class="editor-grid"><div class="panel"><h2>Thể lệ linh hoạt</h2><label for="seconds">Thời gian mỗi lượt (5–3600 giây)</label><input id="seconds" type="number" min="5" max="3600" value="${s.seconds}"><label><input id="autoPass" type="checkbox" ${s.autoPass ? "checked" : ""}> Tự chuyển đội khi hết giờ</label><label><input id="timerEnabled" type="checkbox" ${s.timerEnabled ? "checked" : ""}> Sử dụng đồng hồ</label><label><input id="warningSound" type="checkbox" ${s.warningSound ? "checked" : ""}> Âm báo khi hết giờ trên TV (bấm Bật âm thanh trên TV trước)</label><p class="notice">Câu thường và dự phòng: đúng +1. Siêu khó: không cộng điểm tổ. Bốn tổ chịu thua sẽ tự mở vòng tự do.</p><label for="specialRules">Thể lệ câu đặc biệt (hiện trên TV)</label><textarea id="specialRules" maxlength="2000">${esc(s.specialRules)}</textarea></div><div class="panel"><h2>Không gian trình chiếu</h2>${state.teams.map((t, i) => `<label for="teamname${i}">Tên tổ ${i + 1}</label><input id="teamname${i}" maxlength="100" value="${esc(t.name)}">`).join("")}${button("Lưu tên tổ", "saveTeams")}<label for="eventTitle">Thông điệp màn hình chào</label><input id="eventTitle" maxlength="2000" value="${esc(s.title)}"><label for="prize">Tên giải thưởng đặc biệt</label><input id="prize" maxlength="2000" value="${esc(s.prize)}"><label for="accent">Màu nhấn</label><input id="accent" type="color" value="${s.accent}"><div class="notice">Sau khi đổi thời gian, bấm “Đặt lại” đồng hồ để áp dụng cho lượt đang mở.</div>${button("Lưu thiết lập", "saveSettings", "primary")}</div></div><div class="panel"><h2>Dữ liệu & sao lưu</h2><p class="muted">Lưu bản sao vào USB trước sự kiện. Giữ tổng dữ liệu dưới 140 MB để có thể khôi phục bằng tệp sao lưu (giới hạn 200 MB).</p><div class="row"><a class="button" href="/api/backup" download>Sao lưu toàn bộ</a><label style="margin:0">Khôi phục từ bản sao<input id="restore" type="file" accept=".json"></label>${button("Bắt đầu sự kiện mới", "reset", "bad")}</div><p class="muted"><small>Bắt đầu mới đặt lại điểm và tiến trình, giữ câu hỏi, tệp và thiết lập. Có thể hoàn tác.</small></p></div>`;
+  return `<div class="editor-grid"><div class="panel"><h2>Thể lệ linh hoạt</h2><label for="seconds">Thời gian mỗi lượt (5–3600 giây)</label><input id="seconds" type="number" min="5" max="3600" value="${s.seconds}"><label><input id="autoPass" type="checkbox" ${s.autoPass ? "checked" : ""}> Tự chuyển đội khi hết giờ</label><label><input id="timerEnabled" type="checkbox" ${s.timerEnabled ? "checked" : ""}> Sử dụng đồng hồ</label><label><input id="warningSound" type="checkbox" ${s.warningSound ? "checked" : ""}> Âm báo khi hết giờ trên TV (bấm Bật âm thanh trên TV trước)</label><p class="notice">Câu thường và dự phòng: đúng +1. Siêu khó: không cộng điểm tổ. Bốn tổ chịu thua sẽ tự mở vòng tự do.</p><label for="specialRules">Thể lệ câu đặc biệt (hiện trên TV)</label><textarea id="specialRules" maxlength="2000">${esc(s.specialRules)}</textarea></div><div class="panel"><h2>Không gian trình chiếu</h2><label for="programName">Tên minigame</label><input id="programName" maxlength="100" value="${esc(programName())}"><p class="muted">Chủ đề hình ảnh: Chuyến Bay Tinh Cầu V4. Tên minigame và thông điệp màn hình chào được lưu riêng.</p>${state.teams.map((t, i) => `<label for="teamname${i}">Tên tổ ${i + 1}</label><input id="teamname${i}" maxlength="100" value="${esc(t.name)}">`).join("")}${button("Lưu tên tổ", "saveTeams")}<label for="eventTitle">Thông điệp màn hình chào</label><input id="eventTitle" maxlength="2000" value="${esc(s.title)}"><label for="prize">Tên giải thưởng đặc biệt</label><input id="prize" maxlength="2000" value="${esc(s.prize)}"><label for="accent">Màu nhấn điều khiển (màu bốn tổ trên TV cố định)</label><input id="accent" type="color" value="${s.accent}"><div class="notice">Sau khi đổi thời gian, bấm “Đặt lại” đồng hồ để áp dụng cho lượt đang mở.</div>${button("Lưu thiết lập", "saveSettings", "primary")}</div></div><div class="panel"><h2>Dữ liệu & sao lưu</h2><p class="muted">Lưu bản sao vào USB trước sự kiện. Giữ tổng dữ liệu dưới 140 MB để có thể khôi phục bằng tệp sao lưu (giới hạn 200 MB).</p><div class="row"><a class="button" href="/api/backup" download>Sao lưu toàn bộ</a><label style="margin:0">Khôi phục từ bản sao<input id="restore" type="file" accept=".json"></label>${button("Bắt đầu sự kiện mới", "reset", "bad")}</div><p class="muted"><small>Bắt đầu mới đặt lại điểm và tiến trình, giữ câu hỏi, tệp và thiết lập. Có thể hoàn tác.</small></p></div>`;
 }
 function helpPage() {
-  return `<div class="panel help"><h2>Chuẩn bị và điều khiển</h2><ol><li><b>Quản lý câu hỏi:</b> bản cài mới gồm 8 câu Trong MV (1–8), 4 Chủ đề khác (9–12), 5 Dự phòng (13–17), Siêu khó tự luận (18), Video đặc biệt (19). Câu phân định hòa cũ được chuyển sang Dự phòng, không xóa nội dung. Vì vậy dữ liệu cũ có thể nhiều hơn 19 mục.</li><li><b>Chuẩn bị câu:</b> chọn từ danh sách hoặc bấm CÂU TRƯỚC / CÂU TIẾP THEO. TV chỉ hiện Chuẩn bị..., số câu và nhóm; Admin đã thấy câu, đáp án đúng và giải thích. Chỉ bấm HIỆN CÂU HỎI mới đưa nội dung lên TV.</li><li><b>Chấm trắc nghiệm:</b> bấm ngay A/B/C/D theo câu trả lời. Lượt thường: đúng +1, sai +0; cả hai đều công bố đáp án và kết thúc câu. Không có bước xác nhận thứ hai. Tự luận dùng ĐÚNG / SAI.</li><li><b>Chuyển lượt:</b> CHỊU THUA không lộ đáp án, chuyển sang tổ tiếp theo. Bốn tổ khác nhau cùng chịu thua sẽ tự mở ⚡ Tự do giành quyền trả lời! và bỏ chọn tổ. Bấm tổ giơ tay trước rồi chấm; sai vẫn ẩn đáp án, bỏ chọn tổ để tổ khác thử. Đúng hoặc HIỆN ĐÁP ÁN sẽ kết thúc câu.</li><li><b>Sang câu kế:</b> câu thường tiếp theo bắt đầu từ tổ sau tổ vừa chốt đáp án, kể cả chốt sai. Ví dụ Tổ 2 trả lời cuối cùng → câu tiếp bắt đầu Tổ 3. Có thể bấm chọn tổ để đổi lượt bất kỳ lúc nào.</li></ol><h2>Dự phòng và Siêu khó</h2><p>Dự phòng dùng để phân định hòa hoặc chơi thêm: chọn tổ giơ tay trước, đúng +1 và công bố đáp án; sai giữ kín và cho tổ khác thử. HIỆN ĐÁP ÁN chốt câu nếu không ai trả lời được.</p><p>Siêu khó dành cho cá nhân, luôn tự luận. SAI giữ kín đáp án và tiếp tục; ĐÚNG / CHỐT ĐÁP ÁN công bố đáp án và phản hồi chúc mừng. Không cộng điểm tổ, không cần nhập tên người thắng.</p><h2>Điểm và trình chiếu</h2><p>Chỉnh điểm bằng − / + ngay trong thẻ tổ, không làm đổi tổ đang trả lời. HOÀN TÁC phục hồi thao tác vừa nhầm. Mỗi câu đã kết thúc không thể chấm lại khi quay về; muốn sửa hãy hoàn tác hoặc chỉnh điểm. Công bố tổ có điểm cao nhất bằng 🏆 CÔNG BỐ VÔ ĐỊCH. Nếu hòa, dùng câu Dự phòng trước.</p><p>Khung ĐANG TRÊN TV dùng cùng giao diện TV, gồm trạng thái chờ, câu, đáp án đã công bố, điểm và đồng hồ; video xem trước tắt tiếng để tránh âm thanh lặp. Thông tin đúng/sai riêng của Admin không xuất hiện ở đó trước khi được công bố theo luật.</p><p>Gợi ý chỉ hiện khi MC bật, không trừ điểm. Tắt Có gợi ý trong biên tập vẫn giữ nội dung và tệp. Khi bật Sử dụng đồng hồ, HIỆN CÂU HỎI tự đặt lại và chạy đồng hồ. Có thể Tạm dừng, Tiếp tục hoặc Đặt lại. Mỗi lần hiện câu đều giấu đáp án, kể cả câu đã chấm; câu đã chấm không cộng điểm lại, MC dùng HIỆN ĐÁP ÁN để công bố lại. Mặc định hết giờ không chốt câu; tự chuyển và âm báo là tùy chọn trong Thiết lập.</p><h2>Video đặc biệt</h2><p>Mục cuối dành cho video MP4 kết chương trình. Biên tập tiêu đề và tải video tại Quản lý câu hỏi. Bấm HIỆN VIDEO để phát sạch trên TV, không điểm/đồng hồ/khung câu hỏi. Admin có Phát/Tạm dừng, Phát lại từ đầu, âm lượng và tắt tiếng. Khung TV xem trước luôn tắt tiếng.</p><h2>TV và dữ liệu</h2><p>Kết nối HDMI → Windows + P → Mở rộng. Mở màn hình TV và kéo sang TV; Toàn màn hình mở/thoát hai chiều, Esc để thoát. Bấm Bật âm thanh một lần rồi điều khiển phát từ Admin. Giữ cửa sổ khởi động mở. Sao lưu toàn bộ trước khi nâng cấp; giải nén bản mới vào thư mục riêng rồi Khôi phục từ bản sao. Không xóa dữ liệu bản cũ.</p></div>`;
+  return `<div class="panel help"><h2>${esc(programName())} · Chuyến Bay Tinh Cầu V4</h2><p>Đổi tên chương trình tại Thiết lập → Tên minigame → Lưu thiết lập. Tên chương trình được lưu riêng với thông điệp màn hình chào. Màu tổ trên TV cố định: Tổ 1 cyan, Tổ 2 tím, Tổ 3 hồng, Tổ 4 xanh ngọc. Khung ĐANG TRÊN TV dùng cùng giao diện và trạng thái với màn hình khán giả.</p><h2>Chuẩn bị và điều khiển</h2><ol><li><b>Quản lý câu hỏi:</b> bản cài mới gồm 8 câu Trong MV (1–8), 4 Chủ đề khác (9–12), 5 Dự phòng (13–17), Siêu khó tự luận (18), Video đặc biệt (19). Câu phân định hòa cũ được chuyển sang Dự phòng, không xóa nội dung. Vì vậy dữ liệu cũ có thể nhiều hơn 19 mục.</li><li><b>Chuẩn bị câu:</b> chọn từ danh sách hoặc bấm CÂU TRƯỚC / CÂU TIẾP THEO. TV chỉ hiện Chuẩn bị..., số câu và nhóm; Admin đã thấy câu, đáp án đúng và giải thích. Chỉ bấm HIỆN CÂU HỎI mới đưa nội dung lên TV.</li><li><b>Chấm trắc nghiệm:</b> bấm ngay A/B/C/D theo câu trả lời. Lượt thường: đúng +1, sai +0; cả hai đều công bố đáp án và kết thúc câu. Không có bước xác nhận thứ hai. Tự luận dùng ĐÚNG / SAI.</li><li><b>Chuyển lượt:</b> CHỊU THUA không lộ đáp án, chuyển sang tổ tiếp theo. Bốn tổ khác nhau cùng chịu thua sẽ tự mở ⚡ Tự do giành quyền trả lời! và bỏ chọn tổ. Bấm tổ giơ tay trước rồi chấm; sai vẫn ẩn đáp án, bỏ chọn tổ để tổ khác thử. Đúng hoặc HIỆN ĐÁP ÁN sẽ kết thúc câu.</li><li><b>Sang câu kế:</b> câu thường tiếp theo bắt đầu từ tổ sau tổ vừa chốt đáp án, kể cả chốt sai. Ví dụ Tổ 2 trả lời cuối cùng → câu tiếp bắt đầu Tổ 3. Có thể bấm chọn tổ để đổi lượt bất kỳ lúc nào.</li></ol><h2>Dự phòng và Siêu khó</h2><p>Dự phòng dùng để phân định hòa hoặc chơi thêm: chọn tổ giơ tay trước, đúng +1 và công bố đáp án; sai giữ kín và cho tổ khác thử. HIỆN ĐÁP ÁN chốt câu nếu không ai trả lời được.</p><p>Siêu khó dành cho cá nhân, luôn tự luận. SAI giữ kín đáp án và tiếp tục; ĐÚNG / CHỐT ĐÁP ÁN công bố đáp án và phản hồi chúc mừng. Không cộng điểm tổ, không cần nhập tên người thắng.</p><h2>Điểm và trình chiếu</h2><p>Chỉnh điểm bằng − / + ngay trong thẻ tổ, không làm đổi tổ đang trả lời. HOÀN TÁC phục hồi thao tác vừa nhầm. Mỗi câu đã kết thúc không thể chấm lại khi quay về; muốn sửa hãy hoàn tác hoặc chỉnh điểm. Công bố tổ có điểm cao nhất bằng 🏆 CÔNG BỐ VÔ ĐỊCH. Nếu hòa, dùng câu Dự phòng trước.</p><p>Khung ĐANG TRÊN TV dùng cùng giao diện TV, gồm trạng thái chờ, câu, đáp án đã công bố, điểm và đồng hồ; video xem trước tắt tiếng để tránh âm thanh lặp. Thông tin đúng/sai riêng của Admin không xuất hiện ở đó trước khi được công bố theo luật.</p><p>Gợi ý chỉ hiện khi MC bật, không trừ điểm. Tắt Có gợi ý trong biên tập vẫn giữ nội dung và tệp. Khi bật Sử dụng đồng hồ, HIỆN CÂU HỎI tự đặt lại và chạy đồng hồ. Có thể Tạm dừng, Tiếp tục hoặc Đặt lại. Mỗi lần hiện câu đều giấu đáp án, kể cả câu đã chấm; câu đã chấm không cộng điểm lại, MC dùng HIỆN ĐÁP ÁN để công bố lại. Mặc định hết giờ không chốt câu; tự chuyển và âm báo là tùy chọn trong Thiết lập.</p><h2>Video đặc biệt</h2><p>Mục cuối dành cho video MP4 kết chương trình. Biên tập tiêu đề và tải video tại Quản lý câu hỏi. Bấm HIỆN VIDEO để phát sạch trên TV, không điểm/đồng hồ/khung câu hỏi. Admin có Phát/Tạm dừng, Phát lại từ đầu, âm lượng và tắt tiếng. Khung TV xem trước luôn tắt tiếng.</p><h2>TV và dữ liệu</h2><p>Kết nối HDMI → Windows + P → Mở rộng. Mở màn hình TV và kéo sang TV; Toàn màn hình mở/thoát hai chiều, Esc để thoát. Bấm Bật âm thanh một lần rồi điều khiển phát từ Admin. Giữ cửa sổ khởi động mở. Sao lưu toàn bộ trước khi nâng cấp; giải nén bản mới vào thư mục riêng rồi Khôi phục từ bản sao. Không xóa dữ liệu bản cũ.</p></div>`;
 }
 function updateClock() {
   if (!state) return;
@@ -605,9 +688,17 @@ app.addEventListener("click", async (e) => {
     case "preview": {
       capture();
       const d = document.createElement("dialog");
-      d.innerHTML = `<div class="row spread"><h2>Xem trước riêng • Không gửi lên TV</h2><button id="close-preview">Đóng</button></div>${stage({ ...draft, correct: undefined, hint: undefined, hintMedia: [], answer: undefined, explanation: undefined }, { mode: "question", feedback: "" })}`;
+      d.innerHTML = `<div class="row spread"><h2>Xem trước riêng • Không gửi lên TV</h2><button id="close-preview">Đóng</button></div>${stage({ ...draft, correct: undefined, hint: undefined, hintMedia: [], answer: undefined, explanation: undefined }, { mode: "question", feedback: "", team: null })}`;
+      const frame = document.createElement("div");
+      frame.className = "stage flight-theme";
+      const scene = d.querySelector(".scene");
+      if (scene) {
+        scene.replaceWith(frame);
+        frame.append(scene);
+      }
       document.body.append(d);
       d.showModal();
+      fitFlightTicket();
       d.querySelector("button").onclick = () => d.close();
       d.onclose = () => d.remove();
       break;
@@ -641,6 +732,7 @@ app.addEventListener("click", async (e) => {
           warningSound: $("#warningSound").checked,
           backupPoints: 1,
           tiePoints: 1,
+          programName: $("#programName").value.trim() || "Vụ Nổ Bé",
           title: $("#eventTitle").value,
           prize: $("#prize").value,
           accent: $("#accent").value,

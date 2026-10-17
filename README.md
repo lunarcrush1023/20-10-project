@@ -1,18 +1,18 @@
-# 20/10 Minigame Studio 2.1.1
+# Vụ Nổ Bé 2.2.0 · Chuyến Bay Tinh Cầu V4
 
 Ứng dụng dẫn minigame ngoại tuyến: Admin trên laptop, trình chiếu riêng trên TV. Giao diện hoàn toàn bằng tiếng Việt, không tài khoản ứng dụng, không dịch vụ trả phí, không cần Internet khi tổ chức.
 
-**[Tải bản Windows 2.1.1](https://github.com/lunarcrush1023/20-10-project/blob/main/releases/20-10-Minigame-Studio-2.1.1-Windows.zip?raw=true)** — khoảng 33 MB, có sẵn bộ chạy. Repository riêng tư: đăng nhập GitHub bằng tài khoản có quyền xem kho nếu được yêu cầu. Nếu thấy trang tệp ZIP, bấm **Download raw file**.
+**[Tải bản Windows 2.2.0](https://github.com/lunarcrush1023/20-10-project/blob/main/releases/Vu-No-Be-2.2.0-Windows.zip?raw=true)** — khoảng 33 MB, có sẵn bộ chạy. Repository riêng tư: đăng nhập GitHub bằng tài khoản có quyền xem kho nếu được yêu cầu. Nếu thấy trang tệp ZIP, bấm **Download raw file**.
 
-## Nếu bạn đang dùng bản 1.0, 2.0 hoặc 2.1 — giữ nguyên dữ liệu cũ
+## Nếu bạn đang dùng bản 1.0, 2.0, 2.1 hoặc 2.1.1 — giữ nguyên dữ liệu cũ
 
 1. Mở ứng dụng **bản cũ**, vào **Thiết lập → Sao lưu toàn bộ**, lưu tệp JSON ở nơi dễ tìm. Bản sao này chứa câu hỏi, tệp đính kèm, điểm và tiến trình.
-2. Đóng cửa sổ khởi động bản cũ. Tải ZIP 2.1.1 và **giải nén vào thư mục mới**, không xóa thư mục cũ, không mở hai phiên bản cùng lúc.
+2. Đóng cửa sổ khởi động bản cũ. Tải ZIP 2.2.0 và **giải nén vào thư mục mới**, không xóa thư mục cũ, không mở hai phiên bản cùng lúc.
 3. Trong thư mục mới, nhấp đúp **KHOI-DONG.cmd**. Trình duyệt tự mở sau khoảng 2 giây. Nếu trình duyệt đang giữ trang cũ, nhấn Ctrl + F5.
 4. Vào **Thiết lập → Khôi phục từ bản sao**, chọn JSON vừa lưu và xác nhận. Kiểm tra số câu, tên tổ, điểm và phát thử các tệp của bạn.
-5. Xuất thêm một bản sao từ phiên bản 2.1.1 trước sự kiện. Bản sao 2.1.1 chứa cả gợi ý đa phương tiện và lịch sử điểm; không khôi phục nó bằng ứng dụng 1.0/2.0/2.1.
+5. Xuất thêm một bản sao từ phiên bản 2.2.0 trước sự kiện. Bản sao 2.2.0 chứa cả gợi ý đa phương tiện và lịch sử điểm; không khôi phục nó bằng ứng dụng 1.0/2.0/2.1.
 
-Ứng dụng không thể tự lấy câu hỏi đã nhập trên laptop của bạn từ GitHub. Hãy dùng bản sao JSON để chuyển dữ liệu. Gói tải về không chứa dữ liệu sự kiện của bạn và không tự xóa dữ liệu cũ. Nếu dùng trực tiếp thư mục data cũ với máy chủ 2.1.1, ứng dụng tạo bản trạng thái nguyên gốc `data/before-v4-<thời điểm>.json` trước khi chuyển đổi; toàn bộ tệp media giữ nguyên. Cách dùng giao diện sao lưu/khôi phục ở trên vẫn được khuyến nghị cho người tổ chức.
+Ứng dụng không thể tự lấy câu hỏi đã nhập trên laptop của bạn từ GitHub. Hãy dùng bản sao JSON để chuyển dữ liệu. Gói tải về không chứa dữ liệu sự kiện của bạn và không tự xóa dữ liệu cũ. Nếu dùng trực tiếp thư mục data cũ với máy chủ 2.2.0, ứng dụng tạo bản trạng thái nguyên gốc `data/before-v4-<thời điểm>.json` trước khi chuyển đổi; toàn bộ tệp media giữ nguyên. Cách dùng giao diện sao lưu/khôi phục ở trên vẫn được khuyến nghị cho người tổ chức.
 
 ## Cài mới và mở ứng dụng
 
@@ -22,6 +22,14 @@
 4. Khi dùng xong, sao lưu dữ liệu rồi đóng cửa sổ khởi động. Lần sau mở lại bằng KHOI-DONG.cmd.
 
 Nếu Windows hoặc máy công ty chặn tệp tải xuống, kiểm tra nguồn tải và chính sách máy; không tắt cơ chế bảo vệ. Gói chưa ký số. Nếu báo cổng đang dùng, đóng cửa sổ khởi động phiên bản cũ trước.
+
+## Tên chương trình và theme V4
+
+Tên minigame mặc định là **Vụ Nổ Bé**. Vào **Thiết lập → Tên minigame → Lưu thiết lập** để đổi tên; Admin, tiêu đề trình duyệt, màn hình TV và khung xem trước cập nhật cùng nhau. Tên này được sao lưu/khôi phục, tách riêng khỏi thông điệp màn hình chào và nội dung câu hỏi. Dữ liệu cũ chưa có tên sẽ dùng mặc định, không ghi đè thông điệp cũ.
+
+**Chuyến Bay Tinh Cầu V4** là chủ đề hình ảnh: thẻ lên tàu, nền sao, hành tinh hoạt hình 3D và vệ tinh nhỏ. Màu tổ cố định: Tổ 1 cyan #79E7F0, Tổ 2 tím #B18CFF, Tổ 3 hồng #FF8DBF, Tổ 4 xanh ngọc #7DE9C7. Siêu khó/vòng tự do dùng hành tinh vàng. Màu nhấn trong Thiết lập áp dụng cho điều khiển, không thay bốn màu tổ.
+
+Khung ĐANG TRÊN TV dùng cùng trang TV và dữ liệu công khai. Màn chờ giữ kín câu hỏi, phương án và đáp án; hình thẻ và hành tinh chỉ là trang trí. Video đặc biệt vẫn phát sạch toàn màn hình. Hoạt ảnh giảm/tắt theo thiết lập giảm chuyển động của hệ thống. Toàn bộ đồ họa/font hệ thống chạy ngoại tuyến.
 
 ## Quản lý câu hỏi
 
@@ -75,7 +83,7 @@ Trình duyệt có thể chặn tự phát âm thanh cho tới khi bạn bấm B
 
 ## Kiến trúc và kiểm thử (dành cho người phát triển)
 
-Giữ nguyên kiến trúc bản 1.0: Node.js tiêu chuẩn, HTML/CSS/JavaScript thuần, HTTP chỉ lắng nghe loopback `127.0.0.1`, JSON và media cục bộ. Không có phụ thuộc production, CDN, font ngoài hoặc API Internet. Poll trạng thái 500 ms; đồng hồ lấy mốc thời gian máy chủ. API TV loại đáp án chưa công bố, lựa chọn riêng của MC và media gợi ý chưa hiện. File API hỗ trợ byte range cho video. Fullscreen dùng requestFullscreen/exitFullscreen/fullscreenchange, không giả bằng CSS.
+Giữ nguyên kiến trúc bản 1.0: Node.js tiêu chuẩn, HTML/CSS/JavaScript thuần, HTTP chỉ lắng nghe loopback `127.0.0.1`, JSON và media cục bộ. Không có phụ thuộc production, CDN, font ngoài hoặc API Internet. Poll trạng thái 500 ms; đồng hồ lấy mốc thời gian máy chủ. Tên minigame là trường settings.programName tùy chọn, mặc định Vụ Nổ Bé; giữ schema 4. Không nhập câu hỏi hoặc logic mô phỏng từ demo. API TV loại đáp án chưa công bố, lựa chọn riêng của MC và media gợi ý chưa hiện. File API hỗ trợ byte range cho video. Fullscreen dùng requestFullscreen/exitFullscreen/fullscreenchange, không giả bằng CSS.
 
 Dữ liệu schema 4; nhận bản sao `studio-2010-v1`, `studio-2010-v2`, `studio-2010-v3` và `studio-2010-v4`. Chuyển đổi cộng thêm trường mới, giữ nội dung và ID cũ. Ghi trạng thái bằng tệp tạm rồi đổi tên; dữ liệu lỗi không bị tự thay bằng dữ liệu mẫu.
 
@@ -90,3 +98,5 @@ npm run test:browser
 Kiểm thử trình duyệt dùng `/usr/bin/chromium`; đặt `CHROMIUM_PATH` nếu khác. Test dùng dữ liệu tạm riêng và media mẫu trong `test/fixtures`. Đóng gói bằng `python3 scripts/package.py releases` với runtime Node.js 24.14.0 Windows x64 đã tải vào `work`; xác minh SHA-256 trước khi ghi ZIP. Người tổ chức không cần chạy các lệnh này.
 
 Xem **KIEM-THU.md** để biết kết quả và các phần chưa kiểm tra trên Windows/TV thật.
+
+Theme nằm trong public/theme.css và public/planet.js; public/app.js gắn giao diện vào trạng thái thật. Bộ máy chấm điểm, chuyển lượt, đồng hồ và trình chiếu video giữ nguyên.

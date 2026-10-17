@@ -257,6 +257,7 @@ test("editor toggles answer inputs and keeps hint media offline through backup/r
   await click(page, "02 · Điều khiển trực tiếp");
   const tv = await tvPage(context);
   await click(page, "HIỆN CÂU HỎI");
+  await expect(tv.locator(".question-title")).toBeVisible();
   expect(
     (await (await request.get("/api/audience")).json()).question,
   ).not.toHaveProperty("hintMedia");
@@ -588,4 +589,144 @@ test("19-item ordering and closing MP4 editor, clean TV, playback/restart/volume
   await expect
     .poll(() => tv.locator("video").evaluate((e) => e.paused))
     .toBe(true);
+});
+
+test("V4 planets and four fixed team colors mirror TV/preview without leaking waiting content", async ({
+  page,
+  context,
+  request,
+}) => {
+  await page.goto("/");
+  const tv = await tvPage(context),
+    preview = page.frameLocator("iframe");
+  await expect(page.locator(".brand")).toContainText("Vụ Nổ Bé");
+  await expect(tv.locator(".big-title")).toContainText("Vụ Nổ Bé");
+  const s = await snapshot(request);
+  await page.locator("#select-q").selectOption(s.questions[1].id);
+  for (const v of [tv, preview]) {
+    await expect(v.getByRole("heading", { name: "Chuẩn bị..." })).toBeVisible();
+    await expect(v.locator(".question-title, .option.correct")).toHaveCount(0);
+    await expect(v.locator(".planet-system svg")).toHaveCount(1);
+    await expect(
+      v.locator("[data-action=team], [data-action=chooseOption]"),
+    ).toHaveCount(0);
+  }
+  await click(page, "HIỆN CÂU HỎI");
+  const colors = ["#79e7f0", "#b18cff", "#ff8dbf", "#7de9c7"];
+  const planets = ["LAM NGỌC", "TỬ TINH", "HỒNG VÂN", "LỤC HẢI"];
+  for (let i = 0; i < 4; i++) {
+    await team(page, i).click();
+    for (const v of [tv, preview]) {
+      await expect(v.locator(".planet-caption")).toContainText(planets[i]);
+      expect(
+        await v
+          .locator(".scene")
+          .evaluate((e) =>
+            getComputedStyle(e)
+              .getPropertyValue("--active")
+              .trim()
+              .toLowerCase(),
+          ),
+      ).toBe(colors[i]);
+      await expect(v.locator(".option.correct")).toHaveCount(0);
+    }
+  }
+  await tv.screenshot({ path: "work/theme-team4.png" });
+  await page.screenshot({ path: "work/theme-admin-final.png", fullPage: true });
+  await page.locator("#select-q").selectOption(s.questions[17].id);
+  await click(page, "HIỆN CÂU HỎI");
+  await expect(tv.locator(".planet-caption")).toContainText("THÁI DƯƠNG");
+  await expect(tv.locator(".option.correct")).toHaveCount(0);
+  await expect(tv.locator(".individual-label")).toBeVisible();
+});
+
+test("editable minigame name stays separate from welcome message and persists across backup restore", async ({
+  page,
+  context,
+  request,
+}) => {
+  const legacy = initial();
+  delete legacy.settings.programName;
+  expect(
+    (
+      await request.post("/api/restore", {
+        headers: { Origin: origin },
+        data: { format: "studio-2010-v4", state: legacy, files: {} },
+      })
+    ).ok(),
+  ).toBeTruthy();
+  await page.goto("/");
+  const tv = await tvPage(context);
+  await click(page, "⚙ Thiết lập");
+  await expect(page.locator("#programName")).toHaveValue("Vụ Nổ Bé");
+  await page.locator("#programName").fill("Vũ trụ <của chúng mình>");
+  await click(page, "Lưu thiết lập");
+  await expect(tv.locator(".big-title")).toContainText(
+    "Vũ trụ <của chúng mình>",
+  );
+  await expect(
+    tv.getByRole("heading", { name: legacy.settings.title }),
+  ).toBeVisible();
+  await expect(page.locator(".brand")).toContainText("Vũ trụ <của chúng mình>");
+  const backup = await (await request.get("/api/backup")).json();
+  expect(backup.state.settings.programName).toBe("Vũ trụ <của chúng mình>");
+  expect(backup.state.questions).toEqual(legacy.questions);
+  await act(request, "settings", {
+    settings: { ...backup.state.settings, programName: "Tạm đổi" },
+  });
+  expect(
+    (
+      await request.post("/api/restore", {
+        headers: { Origin: origin },
+        data: backup,
+      })
+    ).ok(),
+  ).toBeTruthy();
+  await page.reload();
+  await tv.reload();
+  await expect(tv).toHaveTitle("Vũ trụ <của chúng mình> · Màn hình TV");
+  await expect(page.locator(".brand")).toContainText("Vũ trụ <của chúng mình>");
+  await expect(page.frameLocator("iframe").locator(".big-title")).toContainText(
+    "Vũ trụ <của chúng mình>",
+  );
+});
+
+test("V4 ticket keeps long options, hint, media and explanation within its bounds; reduced motion works", async ({
+  page,
+  context,
+  request,
+}) => {
+  const s = await snapshot(request),
+    q = {
+      ...s.questions[0],
+      title:
+        "Một câu hỏi dài để kiểm tra bố cục của thẻ lên tàu với các lựa chọn nhiều dòng và nội dung giải thích đi kèm.",
+      options: Array.from(
+        { length: 6 },
+        (_, i) =>
+          `Lựa chọn ${i + 1}: Nội dung dài hơn một dòng trên màn hình để kiểm tra khả năng đọc và tự co giãn.`,
+      ),
+      hint: "Gợi ý bổ sung giúp người chơi suy nghĩ mà không tiết lộ đáp án.",
+      explanation:
+        "Giải thích đáp án được công bố sau khi MC chấm; mọi nội dung này phải nằm trọn trong thẻ.",
+    };
+  await act(request, "saveQuestion", { question: q });
+  await page.goto("/");
+  const tv = await tvPage(context);
+  await tv.emulateMedia({ reducedMotion: "reduce" });
+  await click(page, "HIỆN CÂU HỎI");
+  await click(page, "HIỆN GỢI Ý");
+  await option(page, 0).click();
+  await expect(tv.getByText(q.explanation, { exact: true })).toBeVisible();
+  const bounds = await tv.locator(".ticket-content").boundingBox();
+  const last = await tv.locator(".feedback").boundingBox();
+  expect(last.y + last.height).toBeLessThanOrEqual(
+    bounds.y + bounds.height + 1,
+  );
+  expect(
+    await tv
+      .locator(".main-world")
+      .evaluate((e) => getComputedStyle(e).animationName),
+  ).toBe("none");
+  await tv.screenshot({ path: "work/theme-long-content.png" });
 });
